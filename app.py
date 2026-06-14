@@ -27,7 +27,7 @@ from core.problem_reporting import build_problems_table
 
 st.set_page_config(page_title="Dashboard de asistencia diaria", page_icon="✓", layout="wide")
 
-APP_VERSION = "1.2.0"
+APP_VERSION = "1.3.0"
 
 
 @st.cache_data(show_spinner=False)
@@ -62,8 +62,8 @@ def inject_styles() -> None:
             --panel: #101011;
             --panel-2: #151516;
             --line: rgba(247,243,235,.09);
-            --bone: #f2efe7;
-            --bone-2: #e7e2d8;
+            --stone: #c9c3b8;
+            --stone-2: #b8b1a6;
             --black: #050506;
             --green: #83a98b;
             --amber: #c5a56b;
@@ -73,28 +73,7 @@ def inject_styles() -> None:
         html, body, [data-testid="stAppViewContainer"] { background: var(--black); }
         .stApp { background: var(--black); color: var(--ink); }
         .block-container { max-width: 1380px; padding-top: 1.25rem; padding-bottom: 2rem; }
-        [data-testid="stSidebar"] {
-            background: var(--bone); color: #171719; border-right: 1px solid rgba(0,0,0,.08);
-            box-shadow: 12px 0 35px rgba(0,0,0,.24);
-        }
-        [data-testid="stSidebar"] .block-container { padding-top: 1.2rem; }
-        [data-testid="stSidebar"] h1,
-        [data-testid="stSidebar"] h2,
-        [data-testid="stSidebar"] h3,
-        [data-testid="stSidebar"] p,
-        [data-testid="stSidebar"] label,
-        [data-testid="stSidebar"] span { color: #171719 !important; }
-        [data-testid="stSidebar"] hr { border-color: rgba(0,0,0,.12); }
-        [data-testid="stSidebar"] details {
-            background: rgba(255,255,255,.48) !important; border-color: rgba(0,0,0,.10) !important;
-        }
-        [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {
-            background: var(--bone-2); border-color: rgba(0,0,0,.12);
-        }
-        [data-testid="stSidebar"] button {
-            color: #171719 !important; background: rgba(255,255,255,.55) !important;
-            border-color: rgba(0,0,0,.12) !important;
-        }
+        [data-testid="stSidebar"] { display: none; }
         [data-testid="stHeader"] { background: transparent; }
         #MainMenu, footer { visibility: hidden; }
         h1, h2, h3 { letter-spacing: -.025em; }
@@ -124,6 +103,11 @@ def inject_styles() -> None:
         .badge.ipn { color: #e5bdcb; border-color: rgba(165,106,127,.35); background: rgba(107,23,56,.18); }
         .badge.ipn .badge-dot { background: #a56a7f; }
         .section-label { color: #d5d1ce; font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin: .15rem 0 .65rem; }
+        .catalog-strip {
+            display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+            color: #1a1918; font-size: .78rem; font-weight: 680;
+        }
+        .catalog-strip span { color: #514d48; font-weight: 570; }
         .metric-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: .65rem; margin: .2rem 0 .9rem; }
         .metric-card {
             min-height: 112px; border: 1px solid var(--line); border-radius: 17px;
@@ -158,6 +142,34 @@ def inject_styles() -> None:
         [data-baseweb="tab-highlight"] { display: none; }
         [data-testid="stDataFrame"] { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: 0 16px 38px rgba(0,0,0,.28); }
         details { border: 1px solid var(--line) !important; border-radius: 13px !important; background: var(--panel) !important; }
+        div[data-testid="stExpander"] > details {
+            background: linear-gradient(120deg, var(--stone), var(--stone-2)) !important;
+            border: 1px solid rgba(0,0,0,.13) !important; color: #171615 !important;
+            box-shadow: 0 10px 26px rgba(0,0,0,.22); margin-bottom: .8rem;
+        }
+        div[data-testid="stExpander"] > details p,
+        div[data-testid="stExpander"] > details label,
+        div[data-testid="stExpander"] > details span,
+        div[data-testid="stExpander"] > details summary { color: #171615 !important; }
+        div[data-testid="stExpander"] [data-testid="stFileUploaderDropzone"] {
+            background: rgba(247,243,235,.36); border-color: rgba(0,0,0,.14);
+        }
+        div[data-testid="stExpander"] button {
+            color: #171615 !important; background: rgba(247,243,235,.46) !important;
+            border-color: rgba(0,0,0,.14) !important;
+        }
+        [data-testid="stVerticalBlockBorderWrapper"] {
+            border-color: rgba(247,243,235,.10) !important; border-radius: 18px !important;
+            background: linear-gradient(145deg, #131314, #0d0d0e);
+            box-shadow: 0 18px 42px rgba(0,0,0,.34), 0 10px 34px rgba(107,23,56,.055);
+        }
+        [data-testid="stVerticalBlockBorderWrapper"] h4 { color: #e7dfd4; }
+        .panel-kicker {
+            display: inline-block; border-radius: 999px; padding: .27rem .55rem; margin-bottom: .25rem;
+            font-size: .66rem; font-weight: 720; letter-spacing: .07em; text-transform: uppercase;
+        }
+        .panel-kicker.sage { color: #c4d7cd; background: rgba(118,154,144,.16); border: 1px solid rgba(118,154,144,.28); }
+        .panel-kicker.clay { color: #dfc2b6; background: rgba(183,117,97,.15); border: 1px solid rgba(183,117,97,.28); }
         .stAlert { border-radius: 13px; background: #1c1d21; border: 1px solid var(--line); color: #d8d5d2; }
         @media (max-width: 1000px) {
             .metric-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
@@ -315,16 +327,17 @@ except Exception:
 paae_url = configured_catalog_url("PAAE_CATALOG_URL", secrets)
 docentes_url = configured_catalog_url("DOCENTES_CATALOG_URL", secrets)
 
-with st.sidebar:
-    st.markdown("### Fuentes de personal")
-    st.caption("Los catálogos remotos se usan automáticamente. Los archivos manuales sirven como respaldo.")
-    with st.expander("Reemplazar catálogos", expanded=False):
+with st.expander(f"Fuentes de personal y estado del catálogo · v{APP_VERSION}", expanded=False):
+    st.caption("Los catálogos remotos se cargan automáticamente. Usa estos controles solo para reemplazarlos durante la sesión.")
+    catalog_upload_columns = st.columns(2)
+    with catalog_upload_columns[0]:
         paae_file = st.file_uploader(
             "Excel PAAE",
             type=["xlsx", "xls"],
             key="paae_catalog_upload",
             help="Reemplaza la URL PAAE durante esta sesión.",
         )
+    with catalog_upload_columns[1]:
         docentes_file = st.file_uploader(
             "Excel Docentes",
             type=["xlsx", "xls"],
@@ -339,14 +352,15 @@ with st.sidebar:
     catalog_data = build_catalog_result(paae_df, docentes_df)
     catalog = catalog_data["employees"]
     diagnostics = catalog_data["diagnostics"]
-
-    st.divider()
-    st.caption("ESTADO")
-    st.write(f"PAAE · **{len(paae_df) if paae_df is not None else 0}**")
-    st.write(f"Docentes · **{len(docentes_df) if docentes_df is not None else 0}**")
-    st.write(f"Catálogo unificado · **{len(catalog)}**")
-    st.caption("Las URLs privadas permanecen ocultas.")
-    st.caption(f"Versión {APP_VERSION}")
+    st.markdown(
+        '<div class="catalog-strip">'
+        f'<div>PAAE <span>{len(paae_df) if paae_df is not None else 0}</span></div>'
+        f'<div>Docentes <span>{len(docentes_df) if docentes_df is not None else 0}</span></div>'
+        f'<div>Catálogo unificado <span>{len(catalog)}</span></div>'
+        '<div><span>URLs privadas ocultas</span></div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
 
 header_slot = st.empty()
 
@@ -394,7 +408,7 @@ with header_slot.container():
 if catalog.empty:
     st.markdown(
         '<div class="empty-state"><strong>Catálogos pendientes</strong>'
-        'Revisa las fuentes remotas o usa los reemplazos de la barra lateral.</div>',
+        'Revisa las fuentes remotas o abre la barra superior para reemplazarlas.</div>',
         unsafe_allow_html=True,
     )
     st.stop()
@@ -427,35 +441,54 @@ tab_summary, tab_absent, tab_present, tab_problems, tab_catalog, tab_debug = st.
 )
 
 with tab_summary:
-    left, right = st.columns([1.15, 1], gap="large")
+    left, right = st.columns([0.9, 1.1], gap="large")
     with left:
-        st.markdown("#### Cobertura por grupo")
-        chart_data = group_summary.copy()
-        if not chart_data.empty:
-            chart_data["grupo"] = (
-                chart_data["tipo_personal"].astype(str).str.title()
-                + " · "
-                + chart_data["turno"].astype(str).str.title()
-            )
-            st.bar_chart(
-                chart_data.set_index("grupo")[["con_checada", "sin_checada"]],
-                color=["#83a98b", "#a56a7f"],
-                height=300,
-            )
+        with st.container(border=True):
+            st.markdown('<span class="panel-kicker sage">Lectura visual</span>', unsafe_allow_html=True)
+            st.markdown("#### Cobertura por grupo")
+            chart_data = group_summary.copy()
+            if not chart_data.empty:
+                chart_data["grupo"] = (
+                    chart_data["tipo_personal"].astype(str).str.title()
+                    + " · "
+                    + chart_data["turno"].astype(str).str.title()
+                )
+                st.bar_chart(
+                    chart_data.set_index("grupo")[["con_checada", "sin_checada"]],
+                    color=["#769a90", "#b77561"],
+                    height=330,
+                )
     with right:
-        st.markdown("#### Detalle del corte")
-        compact_summary = group_summary.rename(
-            columns={
-                "tipo_personal": "Tipo",
-                "turno": "Turno",
-                "total_esperado": "Total",
-                "con_checada": "Con checada",
-                "sin_checada": "Sin checada",
-                "porcentaje_asistencia": "%",
-            }
-        )
-        visible_columns = ["Tipo", "Turno", "Total", "Con checada", "Sin checada", "%"]
-        st.dataframe(compact_summary[visible_columns], use_container_width=True, hide_index=True, height=300)
+        with st.container(border=True):
+            st.markdown('<span class="panel-kicker clay">Datos del corte</span>', unsafe_allow_html=True)
+            st.markdown("#### Detalle del corte")
+            compact_summary = group_summary.rename(
+                columns={
+                    "tipo_personal": "Tipo",
+                    "turno": "Turno",
+                    "total_esperado": "Total",
+                    "con_checada": "Con checada",
+                    "sin_checada": "Sin checada",
+                    "porcentaje_asistencia": "%",
+                }
+            )
+            compact_summary["%"] = compact_summary["%"].astype(float).round(1)
+            visible_columns = ["Tipo", "Turno", "Total", "Con checada", "Sin checada", "%"]
+            st.dataframe(
+                compact_summary[visible_columns],
+                use_container_width=True,
+                hide_index=True,
+                height=330,
+                column_config={
+                    "%": st.column_config.ProgressColumn(
+                        "% con checada",
+                        help="Porcentaje del grupo con al menos una checada.",
+                        format="%.1f%%",
+                        min_value=0,
+                        max_value=100,
+                    )
+                },
+            )
 
     excel_bytes = build_excel_report(summary, group_summary, present, absent, problems)
     download_columns = st.columns(4)
