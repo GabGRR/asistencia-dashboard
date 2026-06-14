@@ -27,6 +27,15 @@ CATALOG_COLUMNS = [
 
 DOCENTES_SHEET = "DOCENTES 2026-21"
 
+NORMALIZED_ID_COLUMNS = {"empleado_id", "id", "no_empleado", "numero_empleado"}
+NORMALIZED_NAME_COLUMNS = {"nombre_completo", "nombre"}
+
+
+class CatalogFormatError(ValueError):
+    def __init__(self, message: str, diagnostics: list[dict[str, object]] | None = None):
+        super().__init__(message)
+        self.diagnostics = diagnostics or []
+
 
 def strip_accents(value: object) -> str:
     if value is None or pd.isna(value):
@@ -135,18 +144,100 @@ def choose_paae_sheet(file_bytes: bytes) -> str:
     raise ValueError("No se encontró una hoja PAAE con columnas ID y NOMBRE.")
 
 
-def choose_docentes_sheet(file_bytes: bytes) -> str:
+def _sheet_header_candidates(file_bytes: bytes, sheet_name: str, max_rows: int = 25) -> list[dict[str, object]]:
+    preview = pd.read_excel(BytesIO(file_bytes), sheet_name=sheet_name, header=None, nrows=max_rows)
+    candidates: list[dict[str, object]] = []
+    for row_index, row in preview.iterrows():
+        columns = [normalize_column(value) for value in row.tolist() if clean_text(value)]
+        column_set = set(columns)
+        normalized_match = bool(column_set & NORMALIZED_ID_COLUMNS) and bool(
+            column_set & NORMALIZED_NAME_COLUMNS
+        )
+        original_match = "no_empleado" in column_set and "nombre" in column_set and "turno" in column_set
+        score = sum(
+            column in {
+                "empleado_id", "id", "no_empleado", "nombre_completo", "nombre",
+                "apellido_paterno", "apellido_materno", "tipo_personal", "turno",
+                "hora_entrada", "hora_salida", "activo", "fuente",
+            }
+            for column in column_set
+        )
+        candidates.append(
+            {
+                "row": int(row_index),
+                "columns": columns,
+                "normalized_match": normalized_match,
+                "original_match": original_match,
+                "score": int(score),
+            }
+        )
+    return candidates
+
+
+def _best_sheet_candidate(file_bytes: bytes, sheet_name: str, format_name: str) -> dict[str, object] | None:
+    candidates = _sheet_header_candidates(file_bytes, sheet_name)
+    match_key = "normalized_match" if format_name == "normalizado" else "original_match"
+    matches = [candidate for candidate in candidates if candidate[match_key]]
+    if not matches:
+        return None
+    best = max(matches, key=lambda candidate: (candidate["score"], -candidate["row"]))
+    return {"sheet": sheet_name, "format": format_name, **best}
+
+
+def _docentes_diagnostics(file_bytes: bytes) -> list[dict[str, object]]:
     excel = pd.ExcelFile(BytesIO(file_bytes))
-    exact = [name for name in excel.sheet_names if normalize_name(name) == normalize_name(DOCENTES_SHEET)]
-    if exact:
-        return exact[0]
+    diagnostics: list[dict[str, object]] = []
     for sheet_name in excel.sheet_names:
-        try:
-            find_header_row(file_bytes, sheet_name, {"no_empleado", "nombre", "turno"})
-            return sheet_name
-        except ValueError:
-            continue
-    raise ValueError(f"No se encontró la hoja {DOCENTES_SHEET} ni otra tabla docente compatible.")
+        candidates = _sheet_header_candidates(file_bytes, sheet_name)
+        best = max(candidates, key=lambda candidate: candidate["score"], default=None)
+        diagnostics.append(
+            {
+                "hoja": sheet_name,
+                "fila_posible": None if best is None else int(best["row"]) + 1,
+                "columnas_detectadas": [] if best is None else best["columns"],
+                "motivo_rechazo": (
+                    "No contiene una combinación compatible de ID y nombre."
+                    if best is None or not (best["normalized_match"] or best["original_match"])
+                    else "Compatible"
+                ),
+            }
+        )
+    return diagnostics
+
+
+def choose_docentes_sheet(file_bytes: bytes) -> dict[str, object]:
+    excel = pd.ExcelFile(BytesIO(file_bytes))
+    normalized_preferred = [
+        name for name in excel.sheet_names if normalize_column(name) == "catalogo_normalizado"
+    ]
+    hoja1 = [name for name in excel.sheet_names if normalize_column(name) == "hoja1"]
+    original = [
+        name for name in excel.sheet_names if normalize_name(name) == normalize_name(DOCENTES_SHEET)
+    ]
+    remaining = [
+        name for name in excel.sheet_names
+        if name not in normalized_preferred + hoja1 + original
+    ]
+
+    for sheet_name in normalized_preferred + hoja1 + remaining:
+        candidate = _best_sheet_candidate(file_bytes, sheet_name, "normalizado")
+        if candidate:
+            return candidate
+    for sheet_name in original + remaining + hoja1:
+        candidate = _best_sheet_candidate(file_bytes, sheet_name, "original")
+        if candidate:
+            return candidate
+
+    diagnostics = _docentes_diagnostics(file_bytes)
+    summary = "; ".join(
+        f"{item['hoja']}: {', '.join(item['columnas_detectadas'][:12]) or 'sin encabezado compatible'}"
+        for item in diagnostics
+    )
+    raise CatalogFormatError(
+        "No se encontró una tabla docente compatible. "
+        f"Hojas y columnas inspeccionadas: {summary}",
+        diagnostics,
+    )
 
 
 def load_paae_catalog(file_bytes: bytes) -> pd.DataFrame:
@@ -180,32 +271,49 @@ def load_paae_catalog(file_bytes: bytes) -> pd.DataFrame:
 
 
 def load_docentes_catalog(file_bytes: bytes) -> pd.DataFrame:
-    sheet_name = choose_docentes_sheet(file_bytes)
-    source = read_sheet_with_detected_header(file_bytes, sheet_name, {"no_empleado", "nombre", "turno"})
+    selection = choose_docentes_sheet(file_bytes)
+    sheet_name = str(selection["sheet"])
+    source = pd.read_excel(
+        BytesIO(file_bytes),
+        sheet_name=sheet_name,
+        header=int(selection["row"]),
+    )
+    source.columns = [normalize_column(column) for column in source.columns]
     records: list[dict[str, object]] = []
     for _, row in source.iterrows():
-        employee_id = normalize_id(row.get("no_empleado"))
+        employee_id = ""
+        for id_column in ("empleado_id", "id", "no_empleado", "numero_empleado"):
+            employee_id = normalize_id(row.get(id_column))
+            if employee_id:
+                break
         first_name = normalize_name(row.get("nombre"))
         paternal = normalize_name(row.get("apellido_paterno"))
         maternal = normalize_name(row.get("apellido_materno"))
-        if not employee_id and not any((first_name, paternal, maternal)):
+        full_name = normalize_name(row.get("nombre_completo"))
+        if not full_name:
+            full_name = " ".join(part for part in (first_name, paternal, maternal) if part)
+        if not employee_id and not full_name:
             continue
         records.append(
             {
                 "empleado_id": employee_id,
-                "nombre_completo": " ".join(part for part in (first_name, paternal, maternal) if part),
+                "nombre_completo": full_name,
                 "apellido_paterno": paternal,
                 "apellido_materno": maternal,
                 "nombre": first_name,
                 "tipo_personal": "DOCENTE",
                 "turno": normalize_shift(row.get("turno")),
-                "hora_entrada": "",
-                "hora_salida": "",
-                "activo": "SI",
+                "hora_entrada": normalize_time(row.get("hora_entrada")),
+                "hora_salida": normalize_time(row.get("hora_salida")),
+                "activo": normalize_name(row.get("activo")) or "SI",
                 "fuente": "DOCENTES",
             }
         )
-    return ensure_catalog_columns(pd.DataFrame(records))
+    catalog = ensure_catalog_columns(pd.DataFrame(records))
+    catalog.attrs["hoja_detectada"] = sheet_name
+    catalog.attrs["formato_detectado"] = selection["format"]
+    catalog.attrs["fila_encabezado"] = int(selection["row"]) + 1
+    return catalog
 
 
 def ensure_catalog_columns(df: pd.DataFrame | None) -> pd.DataFrame:

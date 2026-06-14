@@ -11,6 +11,7 @@ from core.attendance import (
     analyze_attendance,
 )
 from core.catalog import (
+    CatalogFormatError,
     build_catalog_result,
     configured_catalog_url,
     load_catalog_from_url,
@@ -19,6 +20,7 @@ from core.catalog import (
 )
 from core.export import build_excel_report, dataframe_to_csv_bytes
 from core.pdf_daily_parser import parse_pdf
+from core.problem_reporting import build_problems_table
 
 
 st.set_page_config(page_title="Dashboard de asistencia diaria", page_icon="✓", layout="wide")
@@ -79,30 +81,13 @@ def display_group_cards(group_summary: pd.DataFrame) -> None:
         )
 
 
-def problems_table(results: pd.DataFrame, pdf_only: pd.DataFrame, catalog_issues: pd.DataFrame) -> pd.DataFrame:
-    result_problems = results[results["estado"].isin([STATUS_NOT_FOUND, STATUS_AMBIGUOUS])].copy()
-    frames: list[pd.DataFrame] = []
-    if not result_problems.empty:
-        frames.append(
-            result_problems.assign(origen="CATÁLOGO").rename(
-                columns={"nombre_completo": "nombre", "detalle": "problema"}
-            )[["origen", "empleado_id", "nombre", "pagina_pdf", "problema"]]
-        )
-    if not pdf_only.empty:
-        frames.append(pdf_only.assign(origen="PDF")[["origen", "empleado_id", "nombre", "pagina_pdf", "problema"]])
-    if not catalog_issues.empty:
-        catalog_problem = catalog_issues.copy()
-        catalog_problem["problema"] = "Falta ID, nombre o turno en el catálogo."
-        catalog_problem["pagina_pdf"] = ""
-        catalog_problem["origen"] = "CATÁLOGO"
-        frames.append(
-            catalog_problem.rename(columns={"nombre_completo": "nombre"})[
-                ["origen", "empleado_id", "nombre", "pagina_pdf", "problema"]
-            ]
-        )
-    if not frames:
-        return pd.DataFrame(columns=["origen", "empleado_id", "nombre", "pagina_pdf", "problema"])
-    return pd.concat(frames, ignore_index=True).drop_duplicates()
+def problems_table(results, pdf_only, catalog_issues) -> pd.DataFrame:
+    return build_problems_table(
+        results,
+        pdf_only,
+        catalog_issues,
+        problem_statuses={STATUS_NOT_FOUND, STATUS_AMBIGUOUS},
+    )
 
 
 def secure_remote_status(label: str, error: str | None, diagnostic: dict[str, object]) -> None:
@@ -141,6 +126,9 @@ def load_catalog_source(
     except ValueError as exc:
         diagnostic["error"] = str(exc)
         st.error(f"{label}: {exc}")
+        if isinstance(exc, CatalogFormatError) and exc.diagnostics:
+            with st.expander(f"Diagnóstico de hojas de {label}", expanded=False):
+                st.dataframe(pd.DataFrame(exc.diagnostics), use_container_width=True, hide_index=True)
     except Exception as exc:
         diagnostic["error"] = type(exc).__name__
         st.error(f"{label}: no fue posible leer el archivo.")

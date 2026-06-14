@@ -22,6 +22,7 @@ from core.catalog import (
     normalize_catalogs,
 )
 from core.pdf_daily_parser import extract_rows_from_text, parse_pdf
+from core.problem_reporting import PROBLEM_COLUMNS, build_problems_table
 
 
 class PdfParserTests(unittest.TestCase):
@@ -105,6 +106,50 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(catalog.iloc[1]["turno"], "VESPERTINO")
         self.assertEqual(catalog.iloc[0]["hora_entrada"], "")
 
+    def test_load_docentes_from_catalogo_normalizado(self) -> None:
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine="openpyxl") as writer:
+            pd.DataFrame(
+                [
+                    {
+                        "empleado_id": 301,
+                        "nombre_completo": "Docente Normalizado Uno",
+                        "tipo_personal": "DOCENTE",
+                        "turno": "Matutino",
+                        "activo": "SI",
+                    }
+                ]
+            ).to_excel(writer, sheet_name="Catalogo_normalizado", index=False)
+            pd.DataFrame([{"dato": "no usar"}]).to_excel(writer, sheet_name="Hoja1", index=False)
+        catalog = load_docentes_catalog(output.getvalue())
+        self.assertEqual(catalog.iloc[0]["empleado_id"], "301")
+        self.assertEqual(catalog.iloc[0]["nombre_completo"], "DOCENTE NORMALIZADO UNO")
+        self.assertEqual(catalog.iloc[0]["turno"], "MATUTINO")
+        self.assertEqual(catalog.attrs["hoja_detectada"], "Catalogo_normalizado")
+
+    def test_load_docentes_from_hoja1_paae_style(self) -> None:
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine="openpyxl") as writer:
+            pd.DataFrame(
+                [
+                    {
+                        "ID": 302,
+                        "APELLIDO PATERNO": "Prueba",
+                        "APELLIDO MATERNO": "Docente",
+                        "NOMBRE": "Persona",
+                        "TURNO": "Vespertino",
+                        "HORA ENTRADA": "14:00",
+                        "HORA SALIDA": "20:00",
+                    }
+                ]
+            ).to_excel(writer, sheet_name="Hoja1", index=False)
+        catalog = load_docentes_catalog(output.getvalue())
+        self.assertEqual(catalog.iloc[0]["empleado_id"], "302")
+        self.assertEqual(catalog.iloc[0]["tipo_personal"], "DOCENTE")
+        self.assertEqual(catalog.iloc[0]["turno"], "VESPERTINO")
+        self.assertEqual(catalog.iloc[0]["hora_entrada"], "14:00")
+        self.assertEqual(catalog.attrs["hoja_detectada"], "Hoja1")
+
     def test_unify_catalogs_and_report_missing_data(self) -> None:
         paae = load_paae_catalog(self.build_paae_workbook())
         docentes = load_docentes_catalog(self.build_docentes_workbook())
@@ -152,6 +197,41 @@ class AttendanceTests(unittest.TestCase):
         duplicated = pd.concat([self.catalog.iloc[[0]], self.catalog.iloc[[0]]], ignore_index=True)
         analysis = analyze_attendance(duplicated, self.pages, "08/06/2026")
         self.assertTrue((analysis["results"]["estado"] == STATUS_AMBIGUOUS).all())
+
+
+class ProblemsTableTests(unittest.TestCase):
+    def test_empty_inputs_return_standard_columns(self) -> None:
+        result = build_problems_table(None, [], {})
+        self.assertTrue(result.empty)
+        self.assertEqual(list(result.columns), PROBLEM_COLUMNS)
+
+    def test_duplicate_columns_do_not_raise_invalid_index(self) -> None:
+        frame = pd.DataFrame([["1", "Uno", "Uno duplicado", STATUS_NOT_FOUND]], columns=[
+            "empleado_id", "nombre_completo", "nombre_completo", "estado"
+        ])
+        result = build_problems_table(frame, None, None, {STATUS_NOT_FOUND, STATUS_AMBIGUOUS})
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result.iloc[0]["empleado_id"], "1")
+
+    def test_issues_accept_list_dict_and_dataframe(self) -> None:
+        variants = [
+            [{"empleado_id": "2", "nombre_completo": "Dos"}],
+            {"empleado_id": "2", "nombre_completo": "Dos"},
+            pd.DataFrame([{"empleado_id": "2", "nombre_completo": "Dos"}]),
+        ]
+        for issues in variants:
+            with self.subTest(kind=type(issues).__name__):
+                result = build_problems_table(pd.DataFrame(), pd.DataFrame(), issues)
+                self.assertEqual(len(result), 1)
+                self.assertEqual(list(result.columns), PROBLEM_COLUMNS)
+
+    def test_mixed_frame_shapes_are_normalized(self) -> None:
+        results = pd.DataFrame([{"estado": STATUS_NOT_FOUND, "id": "3", "nombre": "Tres"}])
+        pdf_only = [{"empleado_id": "4", "nombre": "Cuatro", "problema": "No cruzado"}]
+        issues = {"empleado_id": "5", "nombre_completo": "Cinco", "turno": ""}
+        result = build_problems_table(results, pdf_only, issues, {STATUS_NOT_FOUND})
+        self.assertEqual(len(result), 3)
+        self.assertEqual(list(result.columns), PROBLEM_COLUMNS)
 
 
 if __name__ == "__main__":
