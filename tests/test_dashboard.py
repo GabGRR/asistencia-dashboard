@@ -21,11 +21,14 @@ from core.catalog import (
     load_paae_catalog,
     normalize_catalogs,
 )
-from core.pdf_daily_parser import extract_rows_from_text, parse_pdf
+from core.pdf_daily_parser import extract_rows_from_text, format_date_with_weekday, parse_pdf
 from core.problem_reporting import PROBLEM_COLUMNS, build_problems_table
 
 
 class PdfParserTests(unittest.TestCase):
+    def test_date_label_includes_weekday(self) -> None:
+        self.assertEqual(format_date_with_weekday("23/05/2026"), "Sábado 23/05/2026")
+
     def test_single_date_with_check(self) -> None:
         rows = extract_rows_from_text(["Lunes 08/06/2026 07:01:00 a. m. 15:02:00 p. m."])
         self.assertEqual([row["fecha"] for row in rows], ["08/06/2026"])

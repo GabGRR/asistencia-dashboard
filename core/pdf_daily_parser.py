@@ -13,6 +13,7 @@ DATE_PATTERN = r"\d{1,2}/\d{1,2}/\d{4}"
 DATE_RE = re.compile(DATE_PATTERN)
 TIME_RE = re.compile(r"\d{1,2}:\d{2}(?::\d{2})?\s*(?:a|p)\.?\s*m\.?", re.IGNORECASE)
 DAY_NAMES = {"lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"}
+WEEKDAY_NAMES = ("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
 
 
 @dataclass(frozen=True)
@@ -45,6 +46,11 @@ def normalize_name(value: object) -> str:
 def normalize_date(value: str) -> str:
     parsed = datetime.strptime(value.strip(), "%d/%m/%Y")
     return parsed.strftime("%d/%m/%Y")
+
+
+def format_date_with_weekday(value: str) -> str:
+    parsed = datetime.strptime(value.strip(), "%d/%m/%Y")
+    return f"{WEEKDAY_NAMES[parsed.weekday()]} {parsed.strftime('%d/%m/%Y')}"
 
 
 def sort_dates(values: Iterable[str]) -> list[str]:

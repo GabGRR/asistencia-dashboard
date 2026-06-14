@@ -19,7 +19,7 @@ from core.catalog import (
     load_paae_catalog,
 )
 from core.export import build_excel_report, dataframe_to_csv_bytes
-from core.pdf_daily_parser import parse_pdf
+from core.pdf_daily_parser import format_date_with_weekday, parse_pdf
 from core.problem_reporting import build_problems_table
 
 
@@ -243,9 +243,14 @@ if not dates:
     selected_date = None
 elif len(dates) == 1:
     selected_date = dates[0]
-    st.success(f"Fecha detectada automáticamente: {selected_date}")
+    st.success(f"Fecha detectada automáticamente: {format_date_with_weekday(selected_date)}")
 else:
-    selected_date = st.selectbox("Selecciona la fecha a analizar", dates, index=len(dates) - 1)
+    selected_date = st.selectbox(
+        "Selecciona la fecha a analizar",
+        dates,
+        index=len(dates) - 1,
+        format_func=format_date_with_weekday,
+    )
     st.caption(f"Se detectaron {len(dates)} fechas en el PDF.")
 
 if selected_date:
