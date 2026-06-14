@@ -1,0 +1,9 @@
+*.pdf
+*.xlsx
+*.xls
+data/
+.streamlit/secrets.toml
+__pycache__/
+*.py[cod]
+.venv/
+
