@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import html
 
+import altair as alt
 import pandas as pd
 import streamlit as st
 
@@ -33,7 +34,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-APP_VERSION = "1.6.0"
+APP_VERSION = "1.6.1"
 
 
 @st.cache_data(show_spinner=False)
@@ -241,7 +242,7 @@ def inject_product_ui_theme_css() -> None:
             --blue: #78a9bd;
             --mint: #9ee8ce;
             --mint-strong: #74cfaf;
-            --shadow: 0 14px 32px rgba(49,55,50,.10), 0 3px 9px rgba(49,55,50,.06);
+            --shadow: 0 18px 38px rgba(49,55,50,.13), 0 5px 12px rgba(49,55,50,.08);
         }
         html, body, [data-testid="stAppViewContainer"] { background: #f3f3ee; }
         .stApp { background: linear-gradient(145deg, #f6f5f0 0%, #efefe9 100%); color: var(--ink); }
@@ -294,7 +295,7 @@ def inject_product_ui_theme_css() -> None:
             min-height: 112px; border: 1px solid color-mix(in srgb, var(--accent) 26%, #dedfd8); border-radius: 19px;
             padding: .9rem 1rem; position: relative; overflow: hidden;
             background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 8%, #fffefa), #fffefa 76%);
-            box-shadow: var(--shadow), 0 10px 25px color-mix(in srgb, var(--accent) 9%, transparent);
+            box-shadow: 0 18px 34px rgba(49,55,50,.12), 0 12px 28px color-mix(in srgb, var(--accent) 24%, transparent);
         }
         .metric-card:before { content: ""; position: absolute; top: 0; left: 14px; right: 14px; height: 4px; border-radius: 0 0 99px 99px; background: var(--accent); opacity: .72; }
         .metric-label { color: #646963; font-size: .75rem; font-weight: 680; }
@@ -304,7 +305,7 @@ def inject_product_ui_theme_css() -> None:
         .group-card {
             border: 1px solid color-mix(in srgb, var(--accent) 24%, #dedfd8); border-radius: 18px; padding: .82rem .9rem;
             background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 9%, #fffefa), #fafaf6 78%);
-            box-shadow: 0 10px 24px rgba(49,55,50,.08), 0 7px 18px color-mix(in srgb, var(--accent) 7%, transparent);
+            box-shadow: 0 15px 28px rgba(49,55,50,.11), 0 10px 24px color-mix(in srgb, var(--accent) 20%, transparent);
         }
         .group-title { font-size: .76rem; color: #464a45; font-weight: 700; min-height: 2.1em; }
         .group-main { display: flex; justify-content: space-between; align-items: baseline; margin-top: .35rem; }
@@ -322,6 +323,15 @@ def inject_product_ui_theme_css() -> None:
         button, [data-baseweb="select"] > div, [data-baseweb="input"] > div, .stTextInput input {
             border-radius: 999px !important;
         }
+        button svg, summary svg, [data-baseweb="select"] svg,
+        [data-testid="stSidebarCollapseButton"] svg, [data-testid="collapsedControl"] svg {
+            color: #303630 !important; fill: #303630 !important; stroke: #303630 !important;
+            opacity: 1 !important;
+        }
+        button [data-testid="stIconMaterial"], summary [data-testid="stIconMaterial"],
+        [data-baseweb="select"] [data-testid="stIconMaterial"] {
+            color: #303630 !important; opacity: 1 !important;
+        }
         button[kind="secondary"], .stDownloadButton button {
             color: #254f40 !important; background: #dff5ec !important; border: 1px solid #b9dfd0 !important;
             box-shadow: 0 5px 12px rgba(65,119,97,.10);
@@ -329,17 +339,35 @@ def inject_product_ui_theme_css() -> None:
         button[kind="secondary"]:hover, .stDownloadButton button:hover { background: #c8eddf !important; border-color: #83c8ad !important; }
         [data-baseweb="select"] > div, [data-baseweb="input"] > div, .stTextInput input {
             color: #2b2e2a !important; background: #fffefa !important; border-color: #d5d8d1 !important;
-            box-shadow: inset 0 0 0 1px rgba(121,185,157,.03), 0 5px 12px rgba(49,55,50,.05);
+            box-shadow: inset 0 0 0 1px rgba(121,185,157,.10), 0 8px 18px rgba(72,126,104,.10);
         }
+        [data-baseweb="popover"], [data-baseweb="menu"], [role="listbox"] {
+            color: #2b2e2a !important; background: #fffefa !important;
+            border: 1px solid #d5d8d1 !important; border-radius: 16px !important;
+            box-shadow: 0 20px 44px rgba(49,55,50,.18), 0 9px 26px rgba(116,207,175,.16) !important;
+        }
+        [role="option"] { color: #30332f !important; background: #fffefa !important; }
+        [role="option"]:hover, [role="option"][aria-selected="true"] { background: #dcf4ea !important; color: #244c3d !important; }
         [data-baseweb="tab-list"] { gap: .28rem; background: #e4e5df; border: 1px solid #d3d5ce; padding: .3rem; border-radius: 999px; box-shadow: inset 0 2px 5px rgba(49,55,50,.06); }
         [data-baseweb="tab"] { color: #555a54; height: 38px; border-radius: 999px; padding: 0 .9rem; }
         [aria-selected="true"][data-baseweb="tab"] { color: #234c3d; background: #bcebd9; box-shadow: 0 4px 10px rgba(65,119,97,.14), inset 0 0 0 1px #9bd8c1; }
         [data-baseweb="tab-highlight"] { display: none; }
-        [data-testid="stDataFrame"] { border: 1px solid #d8dad4; border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); background: #fffefa; }
-        details { border: 1px solid #d9dad4 !important; border-radius: 16px !important; background: #f8f7f2 !important; box-shadow: 0 7px 18px rgba(49,55,50,.06); }
+        [data-testid="stDataFrame"] {
+            border: 1px solid #cbded5; border-radius: 18px; overflow: hidden;
+            box-shadow: 0 20px 42px rgba(49,55,50,.14), 0 12px 32px rgba(116,207,175,.18);
+            background: #fffefa;
+        }
+        [data-testid="stArrowVegaLiteChart"] {
+            border: 1px solid #cfe0d8; border-radius: 18px; padding: .5rem;
+            background: linear-gradient(145deg, #fffefa, #f2faf6);
+            box-shadow: 0 20px 42px rgba(49,55,50,.13), 0 12px 30px rgba(120,169,189,.17);
+        }
+        details { border: 1px solid #d9dad4 !important; border-radius: 16px !important; background: #f8f7f2 !important; box-shadow: 0 12px 26px rgba(49,55,50,.10), 0 7px 18px rgba(116,207,175,.10); }
+        details summary { color: #30332f !important; }
+        details summary::marker { color: #35634f !important; }
         div[data-testid="stExpander"] > details p, div[data-testid="stExpander"] > details label,
         div[data-testid="stExpander"] > details span, div[data-testid="stExpander"] > details summary { color: #30332f !important; }
-        [data-testid="stVerticalBlockBorderWrapper"] { border-color: #daddd6 !important; border-radius: 20px !important; background: #fffefa; box-shadow: var(--shadow); }
+        [data-testid="stVerticalBlockBorderWrapper"] { border-color: #cfded6 !important; border-radius: 20px !important; background: #fffefa; box-shadow: 0 20px 42px rgba(49,55,50,.12), 0 12px 30px rgba(116,207,175,.13); }
         [data-testid="stVerticalBlockBorderWrapper"] h4 { color: #292c28; }
         .panel-kicker { display: inline-block; border-radius: 999px; padding: .27rem .55rem; margin-bottom: .25rem; font-size: .66rem; font-weight: 740; letter-spacing: .07em; text-transform: uppercase; }
         .panel-kicker.sage { color: #35634f; background: #dcf2e9; border: 1px solid #b9dfd0; }
@@ -396,7 +424,8 @@ def load_catalog_source(uploaded_file, remote_url: str, loader, label: str) -> t
         diagnostic["error"] = str(exc)
         st.error(f"{label}: {exc}")
         if isinstance(exc, CatalogFormatError) and exc.diagnostics:
-            st.dataframe(pd.DataFrame(exc.diagnostics), use_container_width=True, hide_index=True)
+            diagnostic_frame = pd.DataFrame(exc.diagnostics)
+            st.dataframe(styled_dataframe(diagnostic_frame), use_container_width=True, hide_index=True)
     except Exception as exc:
         diagnostic["error"] = type(exc).__name__
         st.error(f"{label}: no fue posible leer el archivo.")
@@ -544,6 +573,15 @@ def query_table(results: pd.DataFrame) -> pd.DataFrame:
 
 def style_query_rows(row: pd.Series) -> list[str]:
     state = str(row.get("Estado") or "")
+    if globals().get("visual_theme") == "Product UI claro":
+        backgrounds = {
+            "Con checada": "background-color: #edf8f3; color: #26332d",
+            "Sin checada": "background-color: #fff3e5; color: #3b3025",
+            "No encontrado / revisar": "background-color: #fff8dc; color: #3b3423",
+            "Ambiguo / revisar": "background-color: #f8eaf0; color: #3b2931",
+        }
+        style = backgrounds.get(state, "background-color: #fffefa; color: #292c28")
+        return [style] * len(row)
     backgrounds = {
         "Con checada": "background-color: rgba(118,154,144,.10)",
         "Sin checada": "background-color: rgba(183,117,97,.11)",
@@ -552,6 +590,33 @@ def style_query_rows(row: pd.Series) -> list[str]:
     }
     style = backgrounds.get(state, "")
     return [style] * len(row)
+
+
+def styled_dataframe(dataframe: pd.DataFrame, row_styler=None):
+    styler = dataframe.style
+    if globals().get("visual_theme") == "Product UI claro":
+        styler = styler.set_properties(
+            **{
+                "background-color": "#fffefa",
+                "color": "#292c28",
+                "border-color": "#e1e4de",
+            }
+        ).set_table_styles(
+            [
+                {
+                    "selector": "th",
+                    "props": [
+                        ("background-color", "#dff3ea"),
+                        ("color", "#315847"),
+                        ("border-color", "#c8ddd3"),
+                        ("font-weight", "700"),
+                    ],
+                }
+            ]
+        )
+    if row_styler is not None:
+        styler = styler.apply(row_styler, axis=1)
+    return styler
 
 
 with st.sidebar:
@@ -711,11 +776,41 @@ with tab_summary:
                     + " · "
                     + chart_data["turno"].astype(str).str.title()
                 )
-                st.bar_chart(
-                    chart_data.set_index("grupo")[["con_checada", "sin_checada"]],
-                    color=["#769a90", "#b77561"],
-                    height=330,
-                )
+                if visual_theme == "Product UI claro":
+                    chart_long = chart_data.melt(
+                        id_vars="grupo",
+                        value_vars=["con_checada", "sin_checada"],
+                        var_name="estado",
+                        value_name="personas",
+                    )
+                    chart = (
+                        alt.Chart(chart_long)
+                        .mark_bar(cornerRadiusTopLeft=5, cornerRadiusTopRight=5)
+                        .encode(
+                            x=alt.X("grupo:N", title=None, sort=None, axis=alt.Axis(labelAngle=-55, labelLimit=120)),
+                            y=alt.Y("personas:Q", title=None, stack="zero", axis=alt.Axis(gridColor="#dfe5df")),
+                            color=alt.Color(
+                                "estado:N",
+                                title=None,
+                                scale=alt.Scale(
+                                    domain=["con_checada", "sin_checada"],
+                                    range=["#79ad98", "#d49a7f"],
+                                ),
+                            ),
+                            tooltip=["grupo:N", "estado:N", "personas:Q"],
+                        )
+                        .properties(height=300, background="#fffefa")
+                        .configure_view(stroke=None)
+                        .configure_axis(labelColor="#4d534e", domainColor="#bdc8c0", tickColor="#bdc8c0")
+                        .configure_legend(labelColor="#4d534e", orient="bottom")
+                    )
+                    st.altair_chart(chart, use_container_width=True)
+                else:
+                    st.bar_chart(
+                        chart_data.set_index("grupo")[["con_checada", "sin_checada"]],
+                        color=["#769a90", "#b77561"],
+                        height=330,
+                    )
     with right:
         with st.container(border=True):
             st.markdown('<span class="panel-kicker clay">Datos del corte</span>', unsafe_allow_html=True)
@@ -733,7 +828,7 @@ with tab_summary:
             compact_summary["%"] = compact_summary["%"].astype(float).round(1)
             visible_columns = ["Tipo", "Turno", "Total", "Con checada", "Sin checada", "%"]
             st.dataframe(
-                compact_summary[visible_columns],
+                styled_dataframe(compact_summary[visible_columns]),
                 use_container_width=True,
                 hide_index=True,
                 height=330,
@@ -831,7 +926,7 @@ with tab_query:
             unsafe_allow_html=True,
         )
         display_query = query_table(filtered_results)
-        styled_query = display_query.style.apply(style_query_rows, axis=1)
+        styled_query = styled_dataframe(display_query, style_query_rows)
         st.dataframe(
             styled_query,
             use_container_width=True,
@@ -861,7 +956,7 @@ with tab_problems:
         st.success("No se detectaron problemas de cruce.")
     else:
         st.caption("Estos registros requieren revisión; no detienen el análisis.")
-        st.dataframe(problems, use_container_width=True, hide_index=True, height=470)
+        st.dataframe(styled_dataframe(problems), use_container_width=True, hide_index=True, height=470)
 
 with tab_catalog:
     catalog_metrics = st.columns(5)
@@ -870,7 +965,7 @@ with tab_catalog:
     catalog_metrics[2].metric("Matutino", int((catalog["turno"] == "MATUTINO").sum()))
     catalog_metrics[3].metric("Vespertino", int((catalog["turno"] == "VESPERTINO").sum()))
     catalog_metrics[4].metric("Revisar", int(diagnostics["sin_turno"]))
-    st.dataframe(catalog, use_container_width=True, hide_index=True, height=390)
+    st.dataframe(styled_dataframe(catalog), use_container_width=True, hide_index=True, height=390)
     st.download_button(
         "Descargar catálogo unificado",
         dataframe_to_csv_bytes(catalog),
@@ -892,7 +987,8 @@ with tab_debug:
             }
         )
         if pdf_diagnostics["errores"]:
-            st.dataframe(pd.DataFrame(pdf_diagnostics["errores"]), use_container_width=True, hide_index=True)
+            errors_frame = pd.DataFrame(pdf_diagnostics["errores"])
+            st.dataframe(styled_dataframe(errors_frame), use_container_width=True, hide_index=True)
     with debug_right:
         st.markdown("#### Catálogos")
         st.json(
