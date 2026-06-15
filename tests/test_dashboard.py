@@ -23,6 +23,7 @@ from core.catalog import (
 )
 from core.pdf_daily_parser import extract_rows_from_text, format_date_with_weekday, parse_pdf
 from core.problem_reporting import PROBLEM_COLUMNS, build_problems_table
+from core.query import filter_results
 
 
 class PdfParserTests(unittest.TestCase):
@@ -236,6 +237,29 @@ class ProblemsTableTests(unittest.TestCase):
         self.assertEqual(len(result), 3)
         self.assertEqual(list(result.columns), PROBLEM_COLUMNS)
 
+
+class QueryTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.results = pd.DataFrame(
+            [
+                {"empleado_id": "101", "nombre_completo": "María Pérez", "tipo_personal": "PAAE", "turno": "MATUTINO", "estado": STATUS_WITH_CHECK, "coincidencia_por": "ID"},
+                {"empleado_id": "202", "nombre_completo": "Carlos López", "tipo_personal": "DOCENTE", "turno": "VESPERTINO", "estado": STATUS_WITHOUT_CHECK, "coincidencia_por": "NOMBRE"},
+                {"empleado_id": "303", "nombre_completo": "Persona Mixta", "tipo_personal": "DOCENTE", "turno": "MIXTO", "estado": STATUS_NOT_FOUND, "coincidencia_por": ""},
+            ]
+        )
+
+    def test_search_ignores_accents_and_accepts_id(self) -> None:
+        self.assertEqual(filter_results(self.results, search="maria").iloc[0]["empleado_id"], "101")
+        self.assertEqual(filter_results(self.results, search="202").iloc[0]["nombre_completo"], "Carlos López")
+
+    def test_combined_filters_include_real_mixed_shift(self) -> None:
+        filtered = filter_results(
+            self.results,
+            statuses=[STATUS_NOT_FOUND],
+            personnel_types=["DOCENTE"],
+            shifts=["MIXTO"],
+        )
+        self.assertEqual(filtered["empleado_id"].tolist(), ["303"])
 
 if __name__ == "__main__":
     unittest.main()

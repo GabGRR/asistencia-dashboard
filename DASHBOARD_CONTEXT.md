@@ -38,7 +38,7 @@ La aplicación se utiliza como corte de asistencia diaria, especialmente alreded
 6. Si hay una fecha, se selecciona automáticamente. Si hay varias, se muestra un selector.
 7. Las fechas se presentan con día de la semana, por ejemplo `Sábado 23/05/2026`, pero internamente conservan el formato `DD/MM/AAAA`.
 8. La app cruza las páginas del PDF contra el catálogo unificado, primero por ID y después por nombre normalizado.
-9. Se muestran métricas generales, desglose por tipo y turno, tablas de presentes, personas sin checada y problemas de cruce.
+9. Se muestran métricas generales, desglose por tipo y turno, una pestaña de Consulta con búsqueda/filtros y problemas de cruce.
 10. Los resultados pueden descargarse como Excel o CSV.
 
 ## 4. Catálogos
@@ -143,9 +143,13 @@ Las columnas estándar son:
 - `turno`;
 - `detalle`.
 
+### `core/query.py`
+
+Filtra la tabla de resultados sin alterar los datos base. Permite búsqueda normalizada por nombre o ID y combina filtros de estado, tipo de personal, turno y tipo de coincidencia.
+
 ### `tests/test_dashboard.py`
 
-Contiene pruebas unitarias del parser en memoria, etiqueta de día de semana, carga PAAE, formatos docentes original y normalizados, unificación, clasificación de asistencia, duplicados ambiguos y normalización robusta de la tabla de problemas.
+Contiene pruebas unitarias del parser en memoria, etiqueta de día de semana, carga PAAE, formatos docentes original y normalizados, unificación, clasificación de asistencia, duplicados ambiguos, consulta filtrada y normalización robusta de la tabla de problemas.
 
 ### `requirements.txt`
 
@@ -260,7 +264,7 @@ python -m unittest discover -s tests -v
 7. Compilar los módulos principales:
 
 ```powershell
-python -m py_compile app.py core/catalog.py core/pdf_daily_parser.py core/attendance.py core/export.py core/problem_reporting.py
+python -m py_compile app.py core/catalog.py core/pdf_daily_parser.py core/attendance.py core/export.py core/problem_reporting.py core/query.py
 ```
 
 8. Ejecutar `git status` antes de preparar archivos.

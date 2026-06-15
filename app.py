@@ -23,11 +23,12 @@ from core.catalog import (
 from core.export import build_excel_report, dataframe_to_csv_bytes
 from core.pdf_daily_parser import format_date_with_weekday, parse_pdf
 from core.problem_reporting import build_problems_table
+from core.query import filter_results
 
 
 st.set_page_config(page_title="Dashboard de asistencia diaria", page_icon="✓", layout="wide")
 
-APP_VERSION = "1.3.0"
+APP_VERSION = "1.4.0"
 
 
 @st.cache_data(show_spinner=False)
@@ -111,8 +112,9 @@ def inject_styles() -> None:
         .metric-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: .65rem; margin: .2rem 0 .9rem; }
         .metric-card {
             min-height: 112px; border: 1px solid var(--line); border-radius: 17px;
-            padding: .9rem 1rem; background: var(--panel); position: relative; overflow: hidden;
-            box-shadow: 0 12px 30px rgba(0,0,0,.32), 0 10px 28px rgba(107,23,56,.055);
+            padding: .9rem 1rem; position: relative; overflow: hidden;
+            background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 12%, var(--panel)), var(--panel) 72%);
+            box-shadow: 0 12px 30px rgba(0,0,0,.32), 0 10px 28px color-mix(in srgb, var(--accent) 8%, transparent);
         }
         .metric-card:before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent, #6b1738); opacity: .9; }
         .metric-label { color: var(--muted); font-size: .75rem; font-weight: 650; }
@@ -121,7 +123,8 @@ def inject_styles() -> None:
         .group-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: .65rem; margin-bottom: .9rem; }
         .group-card {
             border: 1px solid var(--line); border-radius: 16px; padding: .82rem .9rem;
-            background: var(--panel-2); box-shadow: 0 10px 25px rgba(0,0,0,.28), 0 8px 22px rgba(107,23,56,.045);
+            background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 13%, var(--panel-2)), var(--panel-2) 74%);
+            box-shadow: 0 10px 25px rgba(0,0,0,.28), 0 8px 22px color-mix(in srgb, var(--accent) 7%, transparent);
         }
         .group-title { font-size: .76rem; color: #d6d2cf; font-weight: 680; min-height: 2.1em; }
         .group-main { display: flex; justify-content: space-between; align-items: baseline; margin-top: .35rem; }
@@ -170,6 +173,10 @@ def inject_styles() -> None:
         }
         .panel-kicker.sage { color: #c4d7cd; background: rgba(118,154,144,.16); border: 1px solid rgba(118,154,144,.28); }
         .panel-kicker.clay { color: #dfc2b6; background: rgba(183,117,97,.15); border: 1px solid rgba(183,117,97,.28); }
+        .panel-kicker.mauve { color: #ddc5d1; background: rgba(165,106,127,.16); border: 1px solid rgba(165,106,127,.30); }
+        .query-count {
+            color: #bdb7b1; font-size: .76rem; margin: -.15rem 0 .55rem;
+        }
         .stAlert { border-radius: 13px; background: #1c1d21; border: 1px solid var(--line); color: #d8d5d2; }
         @media (max-width: 1000px) {
             .metric-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
@@ -317,6 +324,57 @@ def render_group_cards(group_summary: pd.DataFrame) -> None:
     st.markdown(f'<div class="group-grid">{"".join(cards)}</div>', unsafe_allow_html=True)
 
 
+STATUS_LABELS = {
+    STATUS_WITH_CHECK: "Con checada",
+    STATUS_WITHOUT_CHECK: "Sin checada",
+    STATUS_NOT_FOUND: "No encontrado / revisar",
+    STATUS_AMBIGUOUS: "Ambiguo / revisar",
+}
+
+
+def query_status_values(selection: str) -> list[str]:
+    mapping = {
+        "Con checada": [STATUS_WITH_CHECK],
+        "Sin checada": [STATUS_WITHOUT_CHECK],
+        "Por revisar": [STATUS_NOT_FOUND, STATUS_AMBIGUOUS],
+        "No encontrado": [STATUS_NOT_FOUND],
+        "Ambiguo": [STATUS_AMBIGUOUS],
+    }
+    return mapping.get(selection, [])
+
+
+def query_table(results: pd.DataFrame) -> pd.DataFrame:
+    visible = results.copy()
+    visible["estado"] = visible["estado"].map(STATUS_LABELS).fillna(visible["estado"])
+    visible = visible.rename(
+        columns={
+            "empleado_id": "ID",
+            "nombre_completo": "Nombre",
+            "tipo_personal": "Tipo",
+            "turno": "Turno",
+            "estado": "Estado",
+            "checadas": "Checadas",
+            "pagina_pdf": "Página PDF",
+            "coincidencia_por": "Coincidencia",
+            "detalle": "Detalle",
+        }
+    )
+    columns = ["ID", "Nombre", "Tipo", "Turno", "Estado", "Checadas", "Página PDF", "Coincidencia", "Detalle"]
+    return visible[columns]
+
+
+def style_query_rows(row: pd.Series) -> list[str]:
+    state = str(row.get("Estado") or "")
+    backgrounds = {
+        "Con checada": "background-color: rgba(118,154,144,.10)",
+        "Sin checada": "background-color: rgba(183,117,97,.11)",
+        "No encontrado / revisar": "background-color: rgba(180,147,94,.10)",
+        "Ambiguo / revisar": "background-color: rgba(165,106,127,.12)",
+    }
+    style = backgrounds.get(state, "")
+    return [style] * len(row)
+
+
 inject_styles()
 
 try:
@@ -436,8 +494,8 @@ render_group_cards(group_summary)
 if summary["ambiguos"]:
     st.warning(f"Hay {summary['ambiguos']} coincidencia(s) ambigua(s) que requieren revisión.")
 
-tab_summary, tab_absent, tab_present, tab_problems, tab_catalog, tab_debug = st.tabs(
-    ["Resumen", "Sin checada", "Presentes", "Problemas", "Catálogo", "Depuración"]
+tab_summary, tab_query, tab_problems, tab_catalog, tab_debug = st.tabs(
+    ["Resumen", "Consulta", "Problemas", "Catálogo", "Depuración"]
 )
 
 with tab_summary:
@@ -509,13 +567,88 @@ with tab_summary:
         "Problemas CSV", dataframe_to_csv_bytes(problems), "problemas_cruce.csv", "text/csv", use_container_width=True
     )
 
-with tab_absent:
-    st.caption(f"{len(absent)} personas localizadas sin checada en {format_date_with_weekday(selected_date)}.")
-    st.dataframe(absent, use_container_width=True, hide_index=True, height=470)
+with tab_query:
+    with st.container(border=True):
+        st.markdown('<span class="panel-kicker mauve">Consulta de personal</span>', unsafe_allow_html=True)
+        st.markdown("#### Buscar asistencia individual")
+        search_col, status_col = st.columns([2.1, 1], gap="medium")
+        search_value = search_col.text_input(
+            "Nombre o ID",
+            placeholder="Ej. María Pérez o 548",
+            key="query_search",
+        )
+        status_selection = status_col.selectbox(
+            "Estado",
+            ["Todos", "Con checada", "Sin checada", "Por revisar", "No encontrado", "Ambiguo"],
+            key="query_status",
+        )
 
-with tab_present:
-    st.caption(f"{len(present)} personas con al menos una checada en {format_date_with_weekday(selected_date)}.")
-    st.dataframe(present, use_container_width=True, hide_index=True, height=470)
+        type_col, shift_col, match_col = st.columns(3, gap="medium")
+        personnel_options = sorted(value for value in results["tipo_personal"].astype(str).unique() if value)
+        shift_options = sorted(value for value in results["turno"].astype(str).unique() if value)
+        match_options = sorted(value for value in results["coincidencia_por"].astype(str).unique() if value)
+        personnel_selection = type_col.selectbox("Tipo de personal", ["Todos", *personnel_options], key="query_type")
+        shift_selection = shift_col.selectbox("Turno", ["Todos", *shift_options], key="query_shift")
+        match_selection = match_col.selectbox(
+            "Coincidencia",
+            ["Todos", *match_options, "Sin coincidencia"],
+            key="query_match",
+        )
+
+        filtered_results = filter_results(
+            results,
+            search=search_value,
+            statuses=query_status_values(status_selection),
+            personnel_types=[] if personnel_selection == "Todos" else [personnel_selection],
+            shifts=[] if shift_selection == "Todos" else [shift_selection],
+            match_types=(
+                []
+                if match_selection == "Todos"
+                else [""]
+                if match_selection == "Sin coincidencia"
+                else [match_selection]
+            ),
+        )
+
+        query_metrics = st.columns(4)
+        query_metrics[0].metric("Resultados", len(filtered_results))
+        query_metrics[1].metric("Con checada", int((filtered_results["estado"] == STATUS_WITH_CHECK).sum()))
+        query_metrics[2].metric("Sin checada", int((filtered_results["estado"] == STATUS_WITHOUT_CHECK).sum()))
+        query_metrics[3].metric(
+            "Por revisar",
+            int(filtered_results["estado"].isin([STATUS_NOT_FOUND, STATUS_AMBIGUOUS]).sum()),
+        )
+
+        st.markdown(
+            f'<div class="query-count">Corte: {html.escape(format_date_with_weekday(selected_date))} · '
+            f'{len(filtered_results)} de {len(results)} personas</div>',
+            unsafe_allow_html=True,
+        )
+        display_query = query_table(filtered_results)
+        styled_query = display_query.style.apply(style_query_rows, axis=1)
+        st.dataframe(
+            styled_query,
+            use_container_width=True,
+            hide_index=True,
+            height=500,
+            column_config={
+                "ID": st.column_config.TextColumn("ID", width="small"),
+                "Nombre": st.column_config.TextColumn("Nombre", width="large"),
+                "Tipo": st.column_config.TextColumn("Tipo", width="small"),
+                "Turno": st.column_config.TextColumn("Turno", width="medium"),
+                "Estado": st.column_config.TextColumn("Estado", width="medium"),
+                "Checadas": st.column_config.TextColumn("Checadas", width="large"),
+                "Página PDF": st.column_config.TextColumn("Página", width="small"),
+                "Coincidencia": st.column_config.TextColumn("Coincidencia", width="small"),
+                "Detalle": st.column_config.TextColumn("Detalle", width="large"),
+            },
+        )
+        st.download_button(
+            "Descargar consulta CSV",
+            dataframe_to_csv_bytes(filtered_results),
+            f"consulta_asistencia_{selected_date.replace('/', '-')}.csv",
+            "text/csv",
+        )
 
 with tab_problems:
     if problems.empty:
