@@ -933,7 +933,7 @@ with st.sidebar:
     st.markdown("### Apariencia")
     visual_theme = st.radio(
         "Tema visual",
-        ["Oscuro guinda", "Pintado claro", "Studio táctil"],
+        ["Oscuro", "Product UI claro", "Studio táctil"],
         index=0,
         key="visual_theme",
     )
