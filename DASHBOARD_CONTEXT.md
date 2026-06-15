@@ -39,7 +39,9 @@ La aplicación se utiliza como corte de asistencia diaria, especialmente alreded
 7. Las fechas se presentan con día de la semana, por ejemplo `Sábado 23/05/2026`, pero internamente conservan el formato `DD/MM/AAAA`.
 8. La app cruza las páginas del PDF contra el catálogo unificado, primero por ID y después por nombre normalizado.
 9. Se muestran métricas generales, desglose por tipo y turno, una pestaña de Consulta con búsqueda/filtros y problemas de cruce.
-10. Los resultados pueden descargarse como Excel o CSV.
+10. La interfaz `v1.5.0` usa una cabecera compacta en tres bloques: identidad del corte, carga del PDF y fecha seleccionada.
+11. La búsqueda de Consulta ofrece autocompletado por nombre, apellido o ID con opciones `ID · nombre`, sin impedir búsquedas escritas manualmente.
+12. Los resultados pueden descargarse como Excel o CSV.
 
 ## 4. Catálogos
 

@@ -23,7 +23,7 @@ from core.catalog import (
 )
 from core.pdf_daily_parser import extract_rows_from_text, format_date_with_weekday, parse_pdf
 from core.problem_reporting import PROBLEM_COLUMNS, build_problems_table
-from core.query import filter_results
+from core.query import build_person_suggestions, filter_results
 
 
 class PdfParserTests(unittest.TestCase):
@@ -260,6 +260,11 @@ class QueryTests(unittest.TestCase):
             shifts=["MIXTO"],
         )
         self.assertEqual(filtered["empleado_id"].tolist(), ["303"])
+
+    def test_person_suggestions_map_label_to_exact_id(self) -> None:
+        suggestions, search_values = build_person_suggestions(self.results)
+        self.assertIn("101 · María Pérez", suggestions)
+        self.assertEqual(search_values["101 · María Pérez"], "101")
 
 if __name__ == "__main__":
     unittest.main()

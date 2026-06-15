@@ -45,3 +45,26 @@ def filter_results(
 
     return filtered.reset_index(drop=True)
 
+
+def build_person_suggestions(results: pd.DataFrame) -> tuple[list[str], dict[str, str]]:
+    if results.empty:
+        return [], {}
+
+    def cell_text(value: object) -> str:
+        return "" if value is None or pd.isna(value) else str(value).strip()
+
+    suggestions: list[str] = []
+    search_values: dict[str, str] = {}
+    seen: set[str] = set()
+    for _, row in results.iterrows():
+        employee_id = cell_text(row.get("empleado_id"))
+        name = cell_text(row.get("nombre_completo"))
+        if not employee_id and not name:
+            continue
+        label = " · ".join(value for value in (employee_id, name) if value)
+        if label in seen:
+            continue
+        seen.add(label)
+        suggestions.append(label)
+        search_values[label] = employee_id or name
+    return suggestions, search_values

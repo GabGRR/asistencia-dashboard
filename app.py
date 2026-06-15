@@ -23,12 +23,12 @@ from core.catalog import (
 from core.export import build_excel_report, dataframe_to_csv_bytes
 from core.pdf_daily_parser import format_date_with_weekday, parse_pdf
 from core.problem_reporting import build_problems_table
-from core.query import filter_results
+from core.query import build_person_suggestions, filter_results
 
 
 st.set_page_config(page_title="Dashboard de asistencia diaria", page_icon="✓", layout="wide")
 
-APP_VERSION = "1.4.0"
+APP_VERSION = "1.5.0"
 
 
 @st.cache_data(show_spinner=False)
@@ -84,6 +84,12 @@ def inject_styles() -> None:
             background: linear-gradient(132deg, #0c0c0d 0%, #09090a 68%, #160a10 100%);
             box-shadow: 0 22px 70px rgba(0,0,0,.48), 0 14px 55px rgba(107,23,56,.13);
         }
+        .hero.compact { min-height: 154px; padding: .95rem 1rem; margin: 0; }
+        .hero.compact .hero-title { font-size: 1.42rem; }
+        .hero.compact .hero-subtitle { font-size: .78rem; line-height: 1.35; }
+        .hero.compact .hero-date { margin-top: .5rem; }
+        .hero.compact .badge-row { margin-top: .58rem; gap: .32rem; }
+        .hero.compact .badge { padding: .24rem .45rem; font-size: .64rem; }
         .hero:after {
             content: ""; position: absolute; width: 190px; height: 190px;
             border-radius: 50%; right: -70px; top: -105px;
@@ -177,6 +183,10 @@ def inject_styles() -> None:
         .query-count {
             color: #bdb7b1; font-size: .76rem; margin: -.15rem 0 .55rem;
         }
+        .top-control-label {
+            color: #aaa7a2; font-size: .68rem; font-weight: 720; letter-spacing: .07em;
+            text-transform: uppercase; margin-bottom: .35rem;
+        }
         .stAlert { border-radius: 13px; background: #1c1d21; border: 1px solid var(--line); color: #d8d5d2; }
         @media (max-width: 1000px) {
             .metric-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
@@ -242,7 +252,14 @@ def badge(label: str, ok: bool = True, ipn: bool = False) -> str:
     return f'<span class="{classes}"><span class="badge-dot"></span>{html.escape(label)}</span>'
 
 
-def render_header(selected_date: str | None, catalog: pd.DataFrame, paae_ok: bool, docentes_ok: bool) -> None:
+def render_header(
+    selected_date: str | None,
+    catalog: pd.DataFrame,
+    paae_ok: bool,
+    docentes_ok: bool,
+    *,
+    compact: bool = False,
+) -> None:
     date_text = format_date_with_weekday(selected_date) if selected_date else "Esperando reporte PDF"
     badges = "".join(
         [
@@ -255,7 +272,7 @@ def render_header(selected_date: str | None, catalog: pd.DataFrame, paae_ok: boo
     )
     st.markdown(
         f"""
-        <div class="hero">
+        <div class="hero{' compact' if compact else ''}">
             <div class="hero-kicker">Asistencia diaria</div>
             <div class="hero-title">Panel ejecutivo de checadas</div>
             <p class="hero-subtitle">Una lectura clara del corte del día, sin calificar horarios ni incidencias.</p>
@@ -420,47 +437,54 @@ with st.expander(f"Fuentes de personal y estado del catálogo · v{APP_VERSION}"
         unsafe_allow_html=True,
     )
 
-header_slot = st.empty()
-
-st.markdown('<div class="section-label">Reporte del día</div>', unsafe_allow_html=True)
-pdf_file = st.file_uploader(
-    "Sube el Reporte de Tarjeta en PDF",
-    type=["pdf"],
-    help="Una página por empleado. El archivo se procesa en memoria.",
-    label_visibility="visible",
-)
-
 parsed_pdf = None
 selected_date = None
-if pdf_file is not None and not catalog.empty:
-    try:
-        with st.spinner("Leyendo reporte..."):
-            parsed_pdf = cached_parse_pdf(pdf_file.getvalue())
-    except ValueError as exc:
-        st.error(str(exc))
-    except Exception:
-        st.error("No fue posible procesar el PDF. Revisa su formato.")
+identity_column, report_column, date_column = st.columns([1.35, 1, .8], gap="large")
 
-if parsed_pdf is not None:
-    dates = parsed_pdf["dates"]
-    if not dates:
-        st.error("No se detectaron fechas en el PDF. Consulta la pestaña Depuración.")
-    elif len(dates) == 1:
-        selected_date = dates[0]
+with report_column:
+    st.markdown('<div class="top-control-label">Reporte del día</div>', unsafe_allow_html=True)
+    pdf_file = st.file_uploader(
+        "Sube el Reporte de Tarjeta en PDF",
+        type=["pdf"],
+        help="Una página por empleado. El archivo se procesa en memoria.",
+        label_visibility="collapsed",
+    )
+    if pdf_file is not None and not catalog.empty:
+        try:
+            with st.spinner("Leyendo reporte..."):
+                parsed_pdf = cached_parse_pdf(pdf_file.getvalue())
+        except ValueError as exc:
+            st.error(str(exc))
+        except Exception:
+            st.error("No fue posible procesar el PDF. Revisa su formato.")
+
+with date_column:
+    st.markdown('<div class="top-control-label">Fecha del corte</div>', unsafe_allow_html=True)
+    if parsed_pdf is not None:
+        dates = parsed_pdf["dates"]
+        if not dates:
+            st.error("No se detectaron fechas en el PDF.")
+        elif len(dates) == 1:
+            selected_date = dates[0]
+            st.markdown(f"**{format_date_with_weekday(selected_date)}**")
+        else:
+            selected_date = st.selectbox(
+                "Fecha del corte",
+                dates,
+                index=len(dates) - 1,
+                format_func=format_date_with_weekday,
+                label_visibility="collapsed",
+            )
     else:
-        selected_date = st.selectbox(
-            "Fecha del corte",
-            dates,
-            index=len(dates) - 1,
-            format_func=format_date_with_weekday,
-        )
+        st.caption("Disponible al cargar el PDF")
 
-with header_slot.container():
+with identity_column:
     render_header(
         selected_date,
         catalog,
         paae_df is not None and not paae_df.empty,
         docentes_df is not None and not docentes_df.empty,
+        compact=True,
     )
 
 if catalog.empty:
@@ -572,11 +596,17 @@ with tab_query:
         st.markdown('<span class="panel-kicker mauve">Consulta de personal</span>', unsafe_allow_html=True)
         st.markdown("#### Buscar asistencia individual")
         search_col, status_col = st.columns([2.1, 1], gap="medium")
-        search_value = search_col.text_input(
+        suggestion_options, suggestion_search_values = build_person_suggestions(results)
+        search_selection = search_col.selectbox(
             "Nombre o ID",
-            placeholder="Ej. María Pérez o 548",
-            key="query_search",
+            suggestion_options,
+            index=None,
+            placeholder="Escribe un nombre, apellido o ID...",
+            accept_new_options=True,
+            filter_mode="fuzzy",
+            key="query_person",
         )
+        search_value = suggestion_search_values.get(search_selection, search_selection or "")
         status_selection = status_col.selectbox(
             "Estado",
             ["Todos", "Con checada", "Sin checada", "Por revisar", "No encontrado", "Ambiguo"],
