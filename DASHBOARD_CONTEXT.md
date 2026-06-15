@@ -48,6 +48,7 @@ La aplicación se utiliza como corte de asistencia diaria, especialmente alreded
 16. Desde `v1.8.0`, `Obra vigente` es el cuarto tema: una interfaz retro OS/terminal con retícula técnica, tipografía monoespaciada, blanco y negro, ámbar, bordes rígidos y sombras desplazadas.
 17. En `v1.8.1` se oculta la barra superior nativa de Streamlit y la tabla `Detalle del corte` ajusta su altura al contenido para evitar filas visuales vacías en todos los temas.
 18. En `v1.9.0`, `Pintado claro` se reconstruye como un tema Soft 3D Clay con layout Swiss, superficie cálida `#F5F5F0`, menta pastel `#86D8B0`, elevación neumórfica y componentes internos completamente claros.
+19. En `v2.0.0`, `Oscuro guinda` se reemplaza por un sistema 8-bit IPN táctico con guinda institucional, carbón texturizado, cobre/dorado, tipografía terminal, bordes pixelados y tablas, gráfica y uploader completamente tematizados.
 
 ## 4. Catálogos
 
