@@ -34,7 +34,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-APP_VERSION = "1.7.0"
+APP_VERSION = "1.8.0"
 
 
 @st.cache_data(show_spinner=False)
@@ -672,6 +672,171 @@ def inject_tactile_studio_theme_css() -> None:
     )
 
 
+def inject_obra_vigente_theme_css() -> None:
+    st.markdown(
+        """
+        <style>
+        :root {
+            --ipn: #111111;
+            --ipn-soft: #ffb300;
+            --ink: #222222;
+            --muted: #666666;
+            --panel: #f4f4f1;
+            --panel-2: #e7e7e4;
+            --line: #191919;
+            --stone: #eeeeeb;
+            --stone-2: #d7d7d4;
+            --black: #f7f7f4;
+            --green: #68a87f;
+            --amber: #ffb300;
+            --rose: #c85f62;
+            --blue: #477a9d;
+        }
+        html, body, [data-testid="stAppViewContainer"] { background: #f7f7f4; }
+        .stApp {
+            color: #222;
+            font-family: "Courier New", Consolas, monospace;
+            background:
+                linear-gradient(rgba(40,40,40,.065) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(40,40,40,.065) 1px, transparent 1px),
+                linear-gradient(rgba(40,40,40,.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(40,40,40,.025) 1px, transparent 1px),
+                #f7f7f4;
+            background-size: 48px 48px, 48px 48px, 8px 8px, 8px 8px;
+        }
+        .block-container { max-width: 1380px; padding-top: 1.25rem; padding-bottom: 2rem; }
+        [data-testid="stHeader"] { background: rgba(247,247,244,.92); border-bottom: 1px solid #bcbcb8; }
+        #MainMenu, footer { visibility: hidden; }
+        h1, h2, h3, h4, p, label, button, input { font-family: "Courier New", Consolas, monospace !important; }
+        h1, h2, h3, h4 { color: #111; letter-spacing: -.045em; font-weight: 900; text-transform: uppercase; }
+        p, label, [data-testid="stCaptionContainer"] { color: #4b4b49; }
+        [data-testid="stSidebar"] {
+            background:
+                linear-gradient(rgba(30,30,30,.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(30,30,30,.06) 1px, transparent 1px),
+                #ededE9;
+            background-size: 16px 16px;
+            border-right: 2px solid #111;
+            box-shadow: 7px 0 0 rgba(0,0,0,.12);
+        }
+        [data-testid="stSidebar"] * { color: #191919; }
+        [data-testid="stSidebar"] [data-baseweb="radio"] > div { gap: .35rem; }
+        [data-testid="stSidebar"] label[data-baseweb="radio"] {
+            border: 1px solid #111; border-radius: 0; padding: .45rem .55rem;
+            background: #f4f4f1; box-shadow: 3px 3px 0 #aaa;
+        }
+        [data-testid="stSidebar"] label[data-baseweb="radio"]:has(input:checked) {
+            background: #ffb300; box-shadow: 3px 3px 0 #111;
+        }
+        [data-testid="stSidebar"] label[data-baseweb="radio"]:has(input:checked) > div:first-child {
+            background: #ffb300 !important; border-color: #111 !important; box-shadow: 0 0 0 1px #111;
+        }
+        [data-testid="stSidebar"] label[data-baseweb="radio"]:has(input:checked) > div:first-child > div {
+            background: #111 !important;
+        }
+        [data-testid="stSidebar"] .catalog-strip { display: grid; gap: .42rem; }
+        [data-testid="stSidebar"] .catalog-strip div {
+            padding: .55rem .62rem; border: 1px solid #111; border-radius: 0;
+            background: #f3f3f0; box-shadow: 3px 3px 0 #b8b8b4;
+        }
+        [data-testid="stSidebar"] .catalog-strip span { color: #111; float: right; font-weight: 900; }
+        .hero {
+            position: relative; overflow: hidden; border: 2px solid #111; border-radius: 0;
+            padding: 1.25rem 1.4rem; margin-bottom: .85rem;
+            background:
+                linear-gradient(rgba(0,0,0,.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,.035) 1px, transparent 1px),
+                #f1f1ee;
+            background-size: 12px 12px;
+            box-shadow: 6px 6px 0 #111, 11px 11px 0 rgba(255,179,0,.55);
+        }
+        .hero.compact { min-height: 154px; padding: .95rem 1rem; margin: 0; }
+        .hero.compact .hero-title { font-size: 1.42rem; }
+        .hero.compact .hero-subtitle { font-size: .78rem; line-height: 1.35; }
+        .hero.compact .hero-date { margin-top: .5rem; }
+        .hero.compact .badge-row { margin-top: .58rem; gap: .32rem; }
+        .hero.compact .badge { padding: .24rem .45rem; font-size: .64rem; }
+        .hero:after { content: "SYS / ACTIVE"; position: absolute; right: 10px; top: 8px; color: #777; font-size: .58rem; letter-spacing: .08em; }
+        .hero-kicker { color: #111; font-size: .72rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; border-bottom: 1px dashed #111; padding-bottom: .22rem; }
+        .hero-title { color: #050505; font-size: 1.75rem; font-weight: 900; margin: .3rem 0 .18rem; text-transform: uppercase; }
+        .hero-subtitle { color: #4f4f4c; font-size: .88rem; margin: 0; }
+        .hero-date { margin-top: .75rem; color: #111; font-size: .86rem; font-weight: 900; }
+        .badge-row { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .85rem; }
+        .badge {
+            display: inline-flex; align-items: center; gap: .38rem; padding: .32rem .58rem;
+            border-radius: 999px; background: #e3e3e0; border: 1px solid #111;
+            color: #191919; font-size: .70rem; font-weight: 800; box-shadow: 2px 2px 0 #aaa;
+        }
+        .badge-dot { width: 7px; height: 7px; border-radius: 0; background: #333; }
+        .badge.warn { background: #fff2c5; }
+        .badge.warn .badge-dot { background: #ffb300; }
+        .badge.ipn { color: #111; border-color: #111; background: #ffb300; box-shadow: 2px 2px 0 #111; }
+        .badge.ipn .badge-dot { background: #111; }
+        .section-label, .top-control-label { color: #111; font-size: .72rem; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+        .section-label { margin: .15rem 0 .65rem; border-bottom: 1px dashed #111; padding-bottom: .3rem; }
+        .top-control-label { margin-bottom: .35rem; }
+        .metric-grid, .group-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: .75rem; }
+        .metric-grid { margin: .2rem 0 1rem; }
+        .group-grid { margin-bottom: 1rem; }
+        .metric-card, .group-card {
+            position: relative; overflow: hidden; border: 2px solid #111; border-radius: 0;
+            background: #f0f0ed; box-shadow: 5px 5px 0 #aaa, 8px 8px 0 color-mix(in srgb, var(--accent) 48%, transparent);
+        }
+        .metric-card { min-height: 112px; padding: .9rem 1rem; }
+        .group-card { padding: .82rem .9rem; }
+        .metric-card:before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 11px; background: var(--accent); border-bottom: 1px solid #111; }
+        .metric-label, .group-title { color: #333; font-size: .72rem; font-weight: 900; text-transform: uppercase; }
+        .metric-label { margin-top: .5rem; }
+        .metric-value { color: #050505; font-size: 1.75rem; font-weight: 900; margin-top: .42rem; line-height: 1; }
+        .metric-note, .group-main span, .group-foot { color: #555; font-size: .67rem; }
+        .group-title { min-height: 2.1em; border-bottom: 1px dashed #777; }
+        .group-main { display: flex; justify-content: space-between; align-items: baseline; margin-top: .45rem; }
+        .group-main strong { color: #111; font-size: 1.28rem; }
+        .group-bar { height: 9px; background: #d4d4d0; border: 1px solid #111; border-radius: 0; overflow: hidden; margin: .55rem 0 .45rem; }
+        .group-bar span { display: block; height: 100%; border-radius: 0; background: var(--accent); border-right: 1px solid #111; }
+        .group-foot { display: flex; justify-content: space-between; }
+        .empty-state { border: 2px solid #111; border-radius: 0; text-align: left; padding: 1.5rem; color: #333; background: #efefec; box-shadow: 6px 6px 0 #111; }
+        .empty-state:before { content: "SYSTEM ALERT"; display: block; margin: -1.5rem -1.5rem 1rem; padding: .38rem .55rem; background: #ffb300; border-bottom: 2px solid #111; color: #111; font-weight: 900; }
+        .empty-state strong { display: block; color: #111; font-size: 1rem; margin-bottom: .3rem; }
+        [data-testid="stMetric"] { background: #eeeeeb; border: 2px solid #111; border-radius: 0; padding: .7rem .8rem; box-shadow: 4px 4px 0 #aaa; }
+        [data-testid="stMetricValue"], [data-testid="stMetricLabel"] { color: #111; }
+        [data-testid="stFileUploaderDropzone"] { min-height: 68px; border-radius: 0; background: #eeeeeb; border: 2px solid #111; padding: .55rem; box-shadow: 5px 5px 0 #aaa; }
+        [data-testid="stFileUploaderDropzone"] small { display: none; }
+        [data-testid="stFileUploaderDropzone"] p,
+        [data-testid="stFileUploaderDropzone"] span,
+        [data-testid="stFileUploaderDropzone"] div { color: #111 !important; }
+        button, [data-baseweb="select"] > div, [data-baseweb="input"] > div, .stTextInput input { border-radius: 0 !important; }
+        button svg, summary svg, [data-baseweb="select"] svg, [data-testid="stSidebarCollapseButton"] svg, [data-testid="collapsedControl"] svg { color: #111 !important; fill: #111 !important; stroke: #111 !important; opacity: 1 !important; }
+        button[kind="secondary"], .stDownloadButton button { color: #111 !important; background: #d8d8d5 !important; border: 2px solid #111 !important; box-shadow: 4px 4px 0 #111; }
+        button[kind="secondary"]:hover, .stDownloadButton button:hover { background: #ffb300 !important; box-shadow: 6px 6px 0 #111, 0 0 18px rgba(255,179,0,.55); transform: translate(-1px,-1px); }
+        button[kind="secondary"]:active, .stDownloadButton button:active { transform: translate(3px,3px); box-shadow: 1px 1px 0 #111; }
+        [data-baseweb="select"] > div, [data-baseweb="input"] > div, .stTextInput input { color: #111 !important; background: #f0f0ed !important; border: 2px solid #111 !important; box-shadow: 3px 3px 0 #aaa; }
+        [data-baseweb="select"] > div:focus-within, [data-baseweb="input"] > div:focus-within, .stTextInput input:focus { border-color: #111 !important; box-shadow: 4px 4px 0 #ffb300, 0 0 12px rgba(255,179,0,.52) !important; }
+        [data-baseweb="popover"], [data-baseweb="menu"], [role="listbox"] { color: #111 !important; background: #f1f1ee !important; border: 2px solid #111 !important; border-radius: 0 !important; box-shadow: 6px 6px 0 #111 !important; }
+        [role="option"] { color: #111 !important; background: #f1f1ee !important; border-bottom: 1px solid #c2c2be; }
+        [role="option"]:hover, [role="option"][aria-selected="true"] { color: #111 !important; background: #ffb300 !important; }
+        [data-baseweb="tab-list"] { gap: 0; background: transparent; border: 0; border-bottom: 2px solid #111; padding: 0; border-radius: 0; box-shadow: none; }
+        [data-baseweb="tab"] { color: #111; height: 40px; border-radius: 0; padding: 0 .95rem; border: 1px solid transparent; border-bottom: 0; }
+        [aria-selected="true"][data-baseweb="tab"] { color: #111; background: #ffb300; border: 2px solid #111; border-bottom: 0; box-shadow: 3px -2px 0 rgba(0,0,0,.16); }
+        [data-baseweb="tab-highlight"] { display: none; }
+        [data-testid="stDataFrame"] { border: 2px solid #111; border-radius: 0; overflow: hidden; background: #efefec; box-shadow: 6px 6px 0 #111; }
+        [data-testid="stArrowVegaLiteChart"] { border: 2px solid #111; border-radius: 0; padding: .5rem; background: #f0f0ed; box-shadow: 6px 6px 0 #111, 10px 10px 0 rgba(255,179,0,.42); }
+        details { border: 2px solid #111 !important; border-radius: 0 !important; background: #e6e6e3 !important; box-shadow: 4px 4px 0 #111; }
+        details summary, div[data-testid="stExpander"] > details p, div[data-testid="stExpander"] > details label, div[data-testid="stExpander"] > details span { color: #111 !important; }
+        [data-testid="stVerticalBlockBorderWrapper"] { border: 2px solid #111 !important; border-radius: 0 !important; background: #f0f0ed; box-shadow: 6px 6px 0 #111; }
+        [data-testid="stVerticalBlockBorderWrapper"] h4 { color: #111; }
+        .panel-kicker { display: inline-block; border-radius: 0; padding: .3rem .55rem; margin-bottom: .25rem; font-size: .66rem; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; border: 1px solid #111; box-shadow: 2px 2px 0 #111; }
+        .panel-kicker.sage, .panel-kicker.clay, .panel-kicker.mauve { color: #111; background: #ffb300; border-color: #111; }
+        .query-count { color: #444; font-size: .76rem; margin: -.15rem 0 .55rem; }
+        .stAlert { border-radius: 0; background: #f0f0ed; border: 2px solid #111; border-left: 13px solid #ffb300; color: #111; box-shadow: 5px 5px 0 #111; }
+        @media (max-width: 1000px) { .metric-grid, .group-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+        @media (max-width: 650px) { .block-container { padding-left: .8rem; padding-right: .8rem; } .metric-grid, .group-grid { grid-template-columns: 1fr; } .hero-title { font-size: 1.4rem; } }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def problems_table(results, pdf_only, catalog_issues) -> pd.DataFrame:
     return build_problems_table(
         results,
@@ -872,6 +1037,15 @@ def style_query_rows(row: pd.Series) -> list[str]:
         }
         style = backgrounds.get(state, "background-color: #292c32; color: #eee8df")
         return [style] * len(row)
+    if globals().get("visual_theme") == "Obra vigente":
+        backgrounds = {
+            "Con checada": "background-color: #e5eee8; color: #111111",
+            "Sin checada": "background-color: #fff0c8; color: #111111",
+            "No encontrado / revisar": "background-color: #ffdf88; color: #111111",
+            "Ambiguo / revisar": "background-color: #ead8de; color: #111111",
+        }
+        style = backgrounds.get(state, "background-color: #f0f0ed; color: #111111")
+        return [style] * len(row)
     backgrounds = {
         "Con checada": "background-color: rgba(118,154,144,.10)",
         "Sin checada": "background-color: rgba(183,117,97,.11)",
@@ -924,6 +1098,28 @@ def styled_dataframe(dataframe: pd.DataFrame, row_styler=None):
                 }
             ]
         )
+    elif globals().get("visual_theme") == "Obra vigente":
+        styler = styler.set_properties(
+            **{
+                "background-color": "#f0f0ed",
+                "color": "#111111",
+                "border-color": "#777777",
+                "font-family": "Courier New, monospace",
+            }
+        ).set_table_styles(
+            [
+                {
+                    "selector": "th",
+                    "props": [
+                        ("background-color", "#d5d5d2"),
+                        ("color", "#111111"),
+                        ("border-color", "#111111"),
+                        ("font-weight", "900"),
+                        ("font-family", "Courier New, monospace"),
+                    ],
+                }
+            ]
+        )
     if row_styler is not None:
         styler = styler.apply(row_styler, axis=1)
     return styler
@@ -933,7 +1129,7 @@ with st.sidebar:
     st.markdown("### Apariencia")
     visual_theme = st.radio(
         "Tema visual",
-        ["Oscuro guinda", "Pintado claro", "Studio táctil"],
+        ["Oscuro guinda", "Pintado claro", "Studio táctil", "Obra vigente"],
         index=0,
         key="visual_theme",
     )
@@ -943,6 +1139,8 @@ if visual_theme == "Pintado claro":
     inject_product_ui_theme_css()
 elif visual_theme == "Studio táctil":
     inject_tactile_studio_theme_css()
+elif visual_theme == "Obra vigente":
+    inject_obra_vigente_theme_css()
 else:
     inject_dark_theme_css()
 
@@ -1144,6 +1342,40 @@ with tab_summary:
                         .configure_view(stroke=None)
                         .configure_axis(labelColor="#ddd6cb", domainColor="#80745f", tickColor="#80745f")
                         .configure_legend(labelColor="#ddd6cb", orient="bottom")
+                    )
+                    st.altair_chart(chart, use_container_width=True)
+                elif visual_theme == "Obra vigente":
+                    chart_long = chart_data.melt(
+                        id_vars="grupo",
+                        value_vars=["con_checada", "sin_checada"],
+                        var_name="estado",
+                        value_name="personas",
+                    )
+                    chart = (
+                        alt.Chart(chart_long)
+                        .mark_bar(stroke="#111111", strokeWidth=1)
+                        .encode(
+                            x=alt.X("grupo:N", title=None, sort=None, axis=alt.Axis(labelAngle=-55, labelLimit=120)),
+                            y=alt.Y("personas:Q", title=None, stack="zero", axis=alt.Axis(gridColor="#c5c5c1")),
+                            color=alt.Color(
+                                "estado:N",
+                                title=None,
+                                scale=alt.Scale(
+                                    domain=["con_checada", "sin_checada"],
+                                    range=["#333333", "#ffb300"],
+                                ),
+                            ),
+                            tooltip=["grupo:N", "estado:N", "personas:Q"],
+                        )
+                        .properties(height=300, background="#f0f0ed")
+                        .configure_view(stroke="#111111", strokeWidth=1)
+                        .configure_axis(
+                            labelColor="#111111",
+                            domainColor="#111111",
+                            tickColor="#111111",
+                            labelFont="Courier New",
+                        )
+                        .configure_legend(labelColor="#111111", labelFont="Courier New", orient="bottom")
                     )
                     st.altair_chart(chart, use_container_width=True)
                 else:
