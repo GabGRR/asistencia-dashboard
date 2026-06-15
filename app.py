@@ -80,19 +80,137 @@ def inject_dark_theme_css() -> None:
         html, body, [data-testid="stAppViewContainer"] { background: var(--black); }
         .stApp { background: var(--black); color: var(--ink); }
         .block-container { max-width: 1380px; padding-top: 1.25rem; padding-bottom: 2rem; }
-        [data-testid="stSidebar"] { background: #efede6; border-right: 1px solid #d8d3c9; }
-        [data-testid="stSidebar"] * { color: #1a1918; }
-        [data-testid="stSidebar"] [data-baseweb="radio"] > div { gap: .35rem; }
-        [data-testid="stSidebar"] [data-baseweb="radio"] label {
-            border: 1px solid rgba(0,0,0,.10); border-radius: 12px; padding: .42rem .55rem;
-            background: rgba(255,255,255,.42);
-        }
-        [data-testid="stSidebar"] .catalog-strip { display: grid; gap: .4rem; }
-        [data-testid="stSidebar"] .catalog-strip div {
-            padding: .48rem .58rem; border-radius: 10px; background: rgba(255,255,255,.34);
-            border: 1px solid rgba(0,0,0,.08);
-        }
-        [data-testid="stSidebar"] .catalog-strip span { float: right; }
+
+            /* Sidebar oscuro IPN para tema Oscuro guinda */
+            [data-testid="stSidebar"] {
+                background:
+                    radial-gradient(circle at 18% 8%, rgba(107,23,56,.35), transparent 30%),
+                    radial-gradient(circle at 92% 90%, rgba(197,165,107,.13), transparent 34%),
+                    linear-gradient(155deg, #111114 0%, #15161a 48%, #211018 100%) !important;
+                border-right: 1px solid rgba(197,165,107,.28) !important;
+                box-shadow:
+                    inset -1px 0 rgba(255,255,255,.045),
+                    18px 0 48px rgba(0,0,0,.36),
+                    0 0 26px rgba(107,23,56,.14) !important;
+            }
+
+            [data-testid="stSidebar"] * {
+                color: #f7f3eb !important;
+            }
+
+            [data-testid="stSidebar"] h1,
+            [data-testid="stSidebar"] h2,
+            [data-testid="stSidebar"] h3,
+            [data-testid="stSidebar"] h4 {
+                color: #fff3df !important;
+                text-shadow: 0 2px 6px rgba(0,0,0,.45);
+            }
+
+            [data-testid="stSidebar"] p,
+            [data-testid="stSidebar"] label,
+            [data-testid="stSidebar"] span {
+                color: #d8d0c4 !important;
+            }
+
+            /* Radio buttons de Apariencia */
+            [data-testid="stSidebar"] [data-baseweb="radio"] > div {
+                gap: .42rem;
+            }
+
+            [data-testid="stSidebar"] [data-baseweb="radio"] label {
+                border: 1px solid rgba(197,165,107,.22) !important;
+                border-radius: 12px !important;
+                padding: .48rem .58rem !important;
+                background:
+                    linear-gradient(145deg, rgba(37,39,45,.92), rgba(17,18,22,.98)) !important;
+                box-shadow:
+                    inset 1px 1px rgba(255,255,255,.06),
+                    inset -2px -2px rgba(0,0,0,.26),
+                    0 7px 15px rgba(0,0,0,.24) !important;
+            }
+
+            [data-testid="stSidebar"] [data-baseweb="radio"] label:hover {
+                border-color: rgba(197,165,107,.48) !important;
+                background:
+                    linear-gradient(145deg, rgba(107,23,56,.50), rgba(24,26,32,.98)) !important;
+            }
+
+            /* Estado del catálogo */
+            [data-testid="stSidebar"] .catalog-strip {
+                display: grid;
+                gap: .48rem;
+            }
+
+            [data-testid="stSidebar"] .catalog-strip div {
+                padding: .62rem .72rem !important;
+                border-radius: 12px !important;
+                border: 1px solid rgba(197,165,107,.24) !important;
+                background:
+                    linear-gradient(145deg, rgba(38,40,47,.90), rgba(15,16,20,.98)) !important;
+                box-shadow:
+                    inset 1px 1px rgba(255,255,255,.07),
+                    inset -2px -2px rgba(0,0,0,.28),
+                    0 9px 18px rgba(0,0,0,.28) !important;
+            }
+
+            [data-testid="stSidebar"] .catalog-strip span {
+                color: #d8b96f !important;
+                float: right;
+                font-weight: 760 !important;
+            }
+
+            /* Expander Reemplazar catálogos en sidebar */
+            [data-testid="stSidebar"] div[data-testid="stExpander"] > details {
+                background:
+                    linear-gradient(145deg, rgba(107,23,56,.54), rgba(22,24,30,.98)) !important;
+                border: 1px solid rgba(197,165,107,.28) !important;
+                border-radius: 13px !important;
+                box-shadow:
+                    inset 1px 1px rgba(255,255,255,.07),
+                    0 10px 22px rgba(0,0,0,.34),
+                    0 0 18px rgba(107,23,56,.18) !important;
+            }
+
+            [data-testid="stSidebar"] div[data-testid="stExpander"] > details summary {
+                color: #fff1d4 !important;
+                font-weight: 720 !important;
+            }
+
+            /* Uploader dentro del sidebar */
+            [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {
+                background:
+                    linear-gradient(145deg, #2c2f37, #111318) !important;
+                border: 1px solid rgba(197,165,107,.26) !important;
+                border-radius: 12px !important;
+                box-shadow:
+                    inset 1px 1px rgba(255,255,255,.07),
+                    0 8px 16px rgba(0,0,0,.30) !important;
+            }
+
+            /* Botones del sidebar */
+            [data-testid="stSidebar"] button {
+                color: #fff5df !important;
+                background:
+                    linear-gradient(180deg, #6b1738, #461025) !important;
+                border: 1px solid rgba(197,165,107,.35) !important;
+                border-radius: 11px !important;
+                box-shadow:
+                    inset 1px 1px rgba(255,255,255,.11),
+                    0 8px 16px rgba(0,0,0,.30),
+                    0 0 12px rgba(107,23,56,.22) !important;
+            }
+
+            [data-testid="stSidebar"] button:hover {
+                background:
+                    linear-gradient(180deg, #82224a, #57132f) !important;
+                border-color: rgba(197,165,107,.55) !important;
+                box-shadow:
+                    inset 1px 1px rgba(255,255,255,.14),
+                    0 9px 18px rgba(0,0,0,.34),
+                    0 0 16px rgba(197,165,107,.18) !important;
+            }
+
+        
         [data-testid="stHeader"] { background: transparent; }
         #MainMenu, footer { visibility: hidden; }
         h1, h2, h3 { letter-spacing: -.025em; }
