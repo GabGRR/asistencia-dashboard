@@ -47,6 +47,7 @@ La aplicación se utiliza como corte de asistencia diaria, especialmente alreded
 15. Desde `v1.7.0`, el selector incluye `Studio táctil`, un tercer tema grafito inspirado en interfaces físicas con relieve, acentos azul eléctrico y dorado, bordes luminosos y sombras profundas.
 16. Desde `v1.8.0`, `Obra vigente` es el cuarto tema: una interfaz retro OS/terminal con retícula técnica, tipografía monoespaciada, blanco y negro, ámbar, bordes rígidos y sombras desplazadas.
 17. En `v1.8.1` se oculta la barra superior nativa de Streamlit y la tabla `Detalle del corte` ajusta su altura al contenido para evitar filas visuales vacías en todos los temas.
+18. En `v1.9.0`, `Pintado claro` se reconstruye como un tema Soft 3D Clay con layout Swiss, superficie cálida `#F5F5F0`, menta pastel `#86D8B0`, elevación neumórfica y componentes internos completamente claros.
 
 ## 4. Catálogos
 
