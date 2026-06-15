@@ -42,6 +42,7 @@ La aplicación se utiliza como corte de asistencia diaria, especialmente alreded
 10. La interfaz `v1.5.0` usa una cabecera compacta en tres bloques: identidad del corte, carga del PDF y fecha seleccionada.
 11. La búsqueda de Consulta ofrece autocompletado por nombre, apellido o ID con opciones `ID · nombre`, sin impedir búsquedas escritas manualmente.
 12. Los resultados pueden descargarse como Excel o CSV.
+13. Desde `v1.6.0`, la barra lateral permite elegir entre `Oscuro guinda actual` y `Product UI claro`; la misma barra concentra los reemplazos y el estado de los catálogos.
 
 ## 4. Catálogos
 
