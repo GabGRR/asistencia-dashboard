@@ -34,7 +34,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-APP_VERSION = "1.6.1"
+APP_VERSION = "1.7.0"
 
 
 @st.cache_data(show_spinner=False)
@@ -391,6 +391,169 @@ def inject_product_ui_theme_css() -> None:
     )
 
 
+def inject_tactile_studio_theme_css() -> None:
+    st.markdown(
+        """
+        <style>
+        :root {
+            --ipn: #8e735e;
+            --ipn-soft: #d5b276;
+            --ink: #f2eee7;
+            --muted: #bbb5ac;
+            --panel: #303238;
+            --panel-2: #25272d;
+            --line: rgba(239,224,196,.22);
+            --stone: #6f685f;
+            --stone-2: #4a4744;
+            --black: #16191e;
+            --green: #86c9ad;
+            --amber: #e1bf6d;
+            --rose: #c88c8e;
+            --blue: #72b9ff;
+            --electric: #70b9ff;
+            --gold: #e4c572;
+        }
+        html, body, [data-testid="stAppViewContainer"] { background: #171a20; }
+        .stApp {
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 18% 8%, rgba(107,137,166,.16), transparent 26%),
+                radial-gradient(circle at 88% 4%, rgba(213,178,118,.12), transparent 24%),
+                repeating-linear-gradient(117deg, rgba(255,255,255,.012) 0 1px, transparent 1px 4px),
+                linear-gradient(145deg, #25282e 0%, #171a20 58%, #12151a 100%);
+        }
+        .block-container { max-width: 1380px; padding-top: 1.25rem; padding-bottom: 2rem; }
+        [data-testid="stHeader"] { background: rgba(22,25,30,.75); backdrop-filter: blur(14px); }
+        #MainMenu, footer { visibility: hidden; }
+        h1, h2, h3, h4 { color: #f4f0e9; letter-spacing: -.025em; text-shadow: 0 2px 5px rgba(0,0,0,.38); }
+        p, label, [data-testid="stCaptionContainer"] { color: #bbb5ac; }
+        [data-testid="stSidebar"] {
+            background:
+                linear-gradient(155deg, rgba(124,112,99,.50), rgba(44,47,55,.96) 45%, rgba(28,32,39,.98)),
+                repeating-linear-gradient(110deg, rgba(255,255,255,.018) 0 1px, transparent 1px 4px);
+            border-right: 1px solid rgba(231,199,135,.32);
+            box-shadow: inset -1px 0 rgba(255,255,255,.08), 18px 0 45px rgba(0,0,0,.28);
+        }
+        [data-testid="stSidebar"] * { color: #eee8df; }
+        [data-testid="stSidebar"] [data-baseweb="radio"] > div { gap: .42rem; }
+        [data-testid="stSidebar"] [data-baseweb="radio"] label {
+            border: 1px solid rgba(235,215,180,.20); border-radius: 9px; padding: .48rem .58rem;
+            background: linear-gradient(145deg, rgba(126,119,110,.44), rgba(48,51,59,.62));
+            box-shadow: inset 1px 1px rgba(255,255,255,.08), inset -2px -2px rgba(0,0,0,.22), 0 5px 12px rgba(0,0,0,.20);
+        }
+        [data-testid="stSidebar"] .catalog-strip { display: grid; gap: .45rem; }
+        [data-testid="stSidebar"] .catalog-strip div {
+            padding: .58rem .65rem; border-radius: 9px; border: 1px solid rgba(228,197,114,.20);
+            background: linear-gradient(145deg, rgba(121,111,99,.40), rgba(41,44,52,.82));
+            box-shadow: inset 1px 1px rgba(255,255,255,.08), 0 7px 14px rgba(0,0,0,.24);
+        }
+        [data-testid="stSidebar"] .catalog-strip span { color: #e7c987; float: right; }
+        .hero {
+            position: relative; overflow: hidden; border: 1px solid rgba(231,199,135,.42); border-radius: 16px;
+            padding: 1.25rem 1.4rem; margin-bottom: .85rem;
+            background:
+                linear-gradient(135deg, rgba(53,92,128,.90), rgba(43,49,58,.96) 48%, rgba(102,89,75,.92)),
+                repeating-linear-gradient(110deg, rgba(255,255,255,.02) 0 1px, transparent 1px 4px);
+            box-shadow: inset 1px 1px rgba(255,255,255,.22), inset -3px -3px rgba(0,0,0,.30),
+                        0 16px 28px rgba(0,0,0,.48), 0 0 22px rgba(228,197,114,.16);
+        }
+        .hero.compact { min-height: 154px; padding: .95rem 1rem; margin: 0; }
+        .hero.compact .hero-title { font-size: 1.42rem; }
+        .hero.compact .hero-subtitle { font-size: .78rem; line-height: 1.35; }
+        .hero.compact .hero-date { margin-top: .5rem; }
+        .hero.compact .badge-row { margin-top: .58rem; gap: .32rem; }
+        .hero.compact .badge { padding: .24rem .45rem; font-size: .64rem; }
+        .hero:after {
+            content: ""; position: absolute; width: 210px; height: 210px; right: -80px; top: -115px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(113,185,255,.32), rgba(113,185,255,0) 68%);
+        }
+        .hero-kicker { color: #f0d48f; font-size: .72rem; font-weight: 760; letter-spacing: .12em; text-transform: uppercase; }
+        .hero-title { color: #fffaf1; font-size: 1.75rem; font-weight: 740; margin: .2rem 0 .18rem; }
+        .hero-subtitle { color: #d1cbc2; font-size: .92rem; margin: 0; }
+        .hero-date { margin-top: .75rem; color: #fff2cf; font-size: .86rem; font-weight: 650; }
+        .badge-row { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .85rem; }
+        .badge {
+            display: inline-flex; align-items: center; gap: .38rem; padding: .32rem .58rem; border-radius: 8px;
+            background: linear-gradient(145deg, rgba(120,126,133,.52), rgba(39,43,50,.68));
+            border: 1px solid rgba(216,205,185,.25); color: #f2eee7; font-size: .72rem; font-weight: 670;
+            box-shadow: inset 1px 1px rgba(255,255,255,.10), 0 4px 9px rgba(0,0,0,.28);
+        }
+        .badge-dot { width: 7px; height: 7px; border-radius: 50%; background: #86c9ad; box-shadow: 0 0 7px #86c9ad; }
+        .badge.warn .badge-dot { background: #e4c572; box-shadow: 0 0 7px #e4c572; }
+        .badge.ipn { color: #ffe4ae; border-color: rgba(228,197,114,.42); background: linear-gradient(145deg, rgba(126,94,62,.58), rgba(46,43,43,.72)); }
+        .badge.ipn .badge-dot { background: #e4c572; box-shadow: 0 0 7px #e4c572; }
+        .section-label, .top-control-label { color: #d8cfc0; font-size: .72rem; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+        .section-label { margin: .15rem 0 .65rem; }
+        .top-control-label { margin-bottom: .35rem; }
+        .metric-grid, .group-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: .75rem; }
+        .metric-grid { margin: .2rem 0 .95rem; }
+        .group-grid { margin-bottom: .95rem; }
+        .metric-card, .group-card {
+            position: relative; overflow: hidden; border-radius: 12px;
+            border: 1px solid color-mix(in srgb, var(--accent) 48%, #cabd9f);
+            background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 22%, #55535a), #303239 45%, #25282e 100%);
+            box-shadow: inset 1px 1px rgba(255,255,255,.18), inset -3px -3px rgba(0,0,0,.28),
+                        0 12px 18px rgba(0,0,0,.42), 0 0 16px color-mix(in srgb, var(--accent) 20%, transparent);
+        }
+        .metric-card { min-height: 112px; padding: .9rem 1rem; }
+        .group-card { padding: .82rem .9rem; }
+        .metric-card:before { content: ""; position: absolute; inset: 5px; border: 1px solid rgba(255,255,255,.09); border-radius: 8px; pointer-events: none; }
+        .metric-label, .group-title { color: #e8e1d7; font-size: .75rem; font-weight: 680; }
+        .metric-value { color: #fffaf2; font-size: 1.75rem; font-weight: 740; margin-top: .42rem; line-height: 1; text-shadow: 0 2px 5px rgba(0,0,0,.45); }
+        .metric-note, .group-main span, .group-foot { color: #bdb6ac; font-size: .68rem; }
+        .group-title { min-height: 2.1em; }
+        .group-main { display: flex; justify-content: space-between; align-items: baseline; margin-top: .35rem; }
+        .group-main strong { color: #fffaf2; font-size: 1.28rem; }
+        .group-bar { height: 7px; background: #171a20; border: 1px solid rgba(255,255,255,.09); border-radius: 99px; overflow: visible; margin: .55rem 0 .45rem; box-shadow: inset 0 2px 4px rgba(0,0,0,.58); }
+        .group-bar span { display: block; height: 100%; border-radius: 99px; background: var(--accent); box-shadow: 0 0 9px color-mix(in srgb, var(--accent) 70%, transparent); }
+        .group-foot { display: flex; justify-content: space-between; }
+        .empty-state { border: 1px solid rgba(228,197,114,.26); border-radius: 14px; text-align: center; padding: 2.2rem 1rem; color: #bbb5ac; background: linear-gradient(145deg, #3a3a3d, #24272d); box-shadow: inset 1px 1px rgba(255,255,255,.08), 0 14px 26px rgba(0,0,0,.35); }
+        .empty-state strong { display: block; color: #fff3d7; font-size: 1rem; margin-bottom: .3rem; }
+        [data-testid="stMetric"] { background: linear-gradient(145deg, #68635d, #34363c); border: 1px solid rgba(232,209,164,.28); border-radius: 11px; padding: .7rem .8rem; box-shadow: inset 1px 1px rgba(255,255,255,.12), 0 9px 16px rgba(0,0,0,.34); }
+        [data-testid="stMetricValue"], [data-testid="stMetricLabel"] { color: #f5efe6; }
+        [data-testid="stFileUploaderDropzone"] { min-height: 68px; border-radius: 11px; background: linear-gradient(145deg, #5b5753, #303239); border: 1px solid rgba(228,197,114,.38); padding: .55rem; box-shadow: inset 1px 1px rgba(255,255,255,.14), inset -2px -2px rgba(0,0,0,.25), 0 10px 18px rgba(0,0,0,.38); }
+        [data-testid="stFileUploaderDropzone"] small { display: none; }
+        button, [data-baseweb="select"] > div, [data-baseweb="input"] > div, .stTextInput input { border-radius: 9px !important; }
+        button svg, summary svg, [data-baseweb="select"] svg, [data-testid="stSidebarCollapseButton"] svg, [data-testid="collapsedControl"] svg { color: #f1dfb7 !important; fill: #f1dfb7 !important; stroke: #f1dfb7 !important; opacity: 1 !important; }
+        button[kind="secondary"], .stDownloadButton button {
+            color: #fff8e9 !important; background: linear-gradient(180deg, #3f6f99, #294b6d) !important;
+            border: 1px solid #dfc276 !important; box-shadow: inset 1px 1px rgba(255,255,255,.18), inset -2px -2px rgba(0,0,0,.24), 0 0 10px rgba(113,185,255,.38), 0 8px 14px rgba(0,0,0,.36);
+        }
+        button[kind="secondary"]:hover, .stDownloadButton button:hover { background: linear-gradient(180deg, #5795c8, #356990) !important; box-shadow: 0 0 16px rgba(113,185,255,.72), 0 9px 16px rgba(0,0,0,.38); }
+        [data-baseweb="select"] > div, [data-baseweb="input"] > div, .stTextInput input {
+            color: #f3eee6 !important; background: linear-gradient(180deg, #5b5752, #3a3b40) !important;
+            border: 1px solid rgba(226,203,156,.40) !important; box-shadow: inset 0 2px 5px rgba(0,0,0,.30), 0 0 0 1px rgba(255,255,255,.05);
+        }
+        [data-baseweb="select"] > div:focus-within, [data-baseweb="input"] > div:focus-within, .stTextInput input:focus {
+            border-color: #e4c572 !important; box-shadow: 0 0 0 2px rgba(228,197,114,.30), 0 0 14px rgba(113,185,255,.58) !important;
+        }
+        [data-baseweb="popover"], [data-baseweb="menu"], [role="listbox"] { color: #f3eee6 !important; background: #d7d0c5 !important; border: 1px solid #e4c572 !important; border-radius: 9px !important; box-shadow: 0 18px 34px rgba(0,0,0,.52), 0 0 12px rgba(228,197,114,.24) !important; }
+        [role="option"] { color: #292a2d !important; background: #d7d0c5 !important; }
+        [role="option"]:hover, [role="option"][aria-selected="true"] { color: #fff8e9 !important; background: linear-gradient(90deg, #4e7fa8, #315675) !important; box-shadow: inset 0 0 0 1px #e4c572; }
+        [data-baseweb="tab-list"] { gap: .3rem; background: linear-gradient(180deg, #55514d, #292c32); border: 1px solid rgba(228,197,114,.28); padding: .34rem; border-radius: 11px; box-shadow: inset 0 2px 5px rgba(0,0,0,.38), 0 9px 18px rgba(0,0,0,.34); }
+        [data-baseweb="tab"] { color: #d7d0c7; height: 38px; border-radius: 8px; padding: 0 .86rem; }
+        [aria-selected="true"][data-baseweb="tab"] { color: #fff7e6; background: linear-gradient(180deg, #3d6d98, #294b6d); border: 1px solid #e4c572; box-shadow: inset 1px 1px rgba(255,255,255,.14), 0 0 12px rgba(113,185,255,.50); }
+        [data-baseweb="tab-highlight"] { display: none; }
+        [data-testid="stDataFrame"] { border: 1px solid rgba(228,197,114,.34); border-radius: 11px; overflow: hidden; background: #24272d; box-shadow: inset 1px 1px rgba(255,255,255,.06), 0 16px 28px rgba(0,0,0,.46), 0 0 14px rgba(113,185,255,.12); }
+        [data-testid="stArrowVegaLiteChart"] { border: 1px solid rgba(228,197,114,.30); border-radius: 12px; padding: .5rem; background: linear-gradient(145deg, #34373d, #22252b); box-shadow: inset 1px 1px rgba(255,255,255,.07), 0 15px 27px rgba(0,0,0,.44), 0 0 13px rgba(113,185,255,.14); }
+        details { border: 1px solid rgba(228,197,114,.30) !important; border-radius: 10px !important; background: linear-gradient(145deg, #625c55, #303239) !important; box-shadow: inset 1px 1px rgba(255,255,255,.12), 0 10px 18px rgba(0,0,0,.38); }
+        details summary, div[data-testid="stExpander"] > details p, div[data-testid="stExpander"] > details label, div[data-testid="stExpander"] > details span { color: #f1ebe2 !important; }
+        [data-testid="stVerticalBlockBorderWrapper"] { border-color: rgba(228,197,114,.28) !important; border-radius: 13px !important; background: linear-gradient(145deg, #34363c, #22252b); box-shadow: inset 1px 1px rgba(255,255,255,.07), 0 16px 28px rgba(0,0,0,.44); }
+        [data-testid="stVerticalBlockBorderWrapper"] h4 { color: #f5eee4; }
+        .panel-kicker { display: inline-block; border-radius: 7px; padding: .28rem .55rem; margin-bottom: .25rem; font-size: .66rem; font-weight: 740; letter-spacing: .07em; text-transform: uppercase; box-shadow: inset 1px 1px rgba(255,255,255,.10), 0 4px 8px rgba(0,0,0,.26); }
+        .panel-kicker.sage { color: #d8f1e5; background: #3c6658; border: 1px solid #86c9ad; }
+        .panel-kicker.clay { color: #ffe3c8; background: #775748; border: 1px solid #c99070; }
+        .panel-kicker.mauve { color: #f3dbe5; background: #6d4f60; border: 1px solid #c88caa; }
+        .query-count { color: #bdb6ac; font-size: .76rem; margin: -.15rem 0 .55rem; }
+        .stAlert { border-radius: 10px; background: linear-gradient(145deg, #5b5751, #303239); border: 1px solid #e4c572; color: #fff2d4; box-shadow: inset 1px 1px rgba(255,255,255,.10), 0 10px 18px rgba(0,0,0,.38), 0 0 10px rgba(228,197,114,.20); }
+        @media (max-width: 1000px) { .metric-grid, .group-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+        @media (max-width: 650px) { .block-container { padding-left: .8rem; padding-right: .8rem; } .metric-grid, .group-grid { grid-template-columns: 1fr; } .hero-title { font-size: 1.4rem; } }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def problems_table(results, pdf_only, catalog_issues) -> pd.DataFrame:
     return build_problems_table(
         results,
@@ -582,6 +745,15 @@ def style_query_rows(row: pd.Series) -> list[str]:
         }
         style = backgrounds.get(state, "background-color: #fffefa; color: #292c28")
         return [style] * len(row)
+    if globals().get("visual_theme") == "Studio táctil":
+        backgrounds = {
+            "Con checada": "background-color: #314d48; color: #edf8f3",
+            "Sin checada": "background-color: #59493d; color: #fff1df",
+            "No encontrado / revisar": "background-color: #5b5138; color: #fff2c8",
+            "Ambiguo / revisar": "background-color: #55404b; color: #f5e1ea",
+        }
+        style = backgrounds.get(state, "background-color: #292c32; color: #eee8df")
+        return [style] * len(row)
     backgrounds = {
         "Con checada": "background-color: rgba(118,154,144,.10)",
         "Sin checada": "background-color: rgba(183,117,97,.11)",
@@ -614,6 +786,26 @@ def styled_dataframe(dataframe: pd.DataFrame, row_styler=None):
                 }
             ]
         )
+    elif globals().get("visual_theme") == "Studio táctil":
+        styler = styler.set_properties(
+            **{
+                "background-color": "#292c32",
+                "color": "#eee8df",
+                "border-color": "#444850",
+            }
+        ).set_table_styles(
+            [
+                {
+                    "selector": "th",
+                    "props": [
+                        ("background-color", "#3b5871"),
+                        ("color", "#fff3d4"),
+                        ("border-color", "#806f50"),
+                        ("font-weight", "700"),
+                    ],
+                }
+            ]
+        )
     if row_styler is not None:
         styler = styler.apply(row_styler, axis=1)
     return styler
@@ -623,7 +815,7 @@ with st.sidebar:
     st.markdown("### Apariencia")
     visual_theme = st.radio(
         "Tema visual",
-        ["Oscuro guinda actual", "Product UI claro"],
+        ["Oscuro guinda actual", "Product UI claro", "Studio táctil"],
         index=0,
         key="visual_theme",
     )
@@ -631,6 +823,8 @@ with st.sidebar:
 
 if visual_theme == "Product UI claro":
     inject_product_ui_theme_css()
+elif visual_theme == "Studio táctil":
+    inject_tactile_studio_theme_css()
 else:
     inject_dark_theme_css()
 
@@ -803,6 +997,35 @@ with tab_summary:
                         .configure_view(stroke=None)
                         .configure_axis(labelColor="#4d534e", domainColor="#bdc8c0", tickColor="#bdc8c0")
                         .configure_legend(labelColor="#4d534e", orient="bottom")
+                    )
+                    st.altair_chart(chart, use_container_width=True)
+                elif visual_theme == "Studio táctil":
+                    chart_long = chart_data.melt(
+                        id_vars="grupo",
+                        value_vars=["con_checada", "sin_checada"],
+                        var_name="estado",
+                        value_name="personas",
+                    )
+                    chart = (
+                        alt.Chart(chart_long)
+                        .mark_bar(cornerRadiusTopLeft=4, cornerRadiusTopRight=4)
+                        .encode(
+                            x=alt.X("grupo:N", title=None, sort=None, axis=alt.Axis(labelAngle=-55, labelLimit=120)),
+                            y=alt.Y("personas:Q", title=None, stack="zero", axis=alt.Axis(gridColor="#444850")),
+                            color=alt.Color(
+                                "estado:N",
+                                title=None,
+                                scale=alt.Scale(
+                                    domain=["con_checada", "sin_checada"],
+                                    range=["#72b9ff", "#e4c572"],
+                                ),
+                            ),
+                            tooltip=["grupo:N", "estado:N", "personas:Q"],
+                        )
+                        .properties(height=300, background="#292c32")
+                        .configure_view(stroke=None)
+                        .configure_axis(labelColor="#ddd6cb", domainColor="#80745f", tickColor="#80745f")
+                        .configure_legend(labelColor="#ddd6cb", orient="bottom")
                     )
                     st.altair_chart(chart, use_container_width=True)
                 else:
