@@ -34,7 +34,26 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-APP_VERSION = "1.8.0"
+APP_VERSION = "1.8.1"
+
+
+def inject_app_shell_css() -> None:
+    st.markdown(
+        """
+        <style>
+        header[data-testid="stHeader"],
+        [data-testid="stToolbar"],
+        [data-testid="stDecoration"],
+        .stAppToolbar {
+            display: none !important;
+        }
+        .block-container {
+            padding-top: .7rem !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 @st.cache_data(show_spinner=False)
@@ -1144,6 +1163,8 @@ elif visual_theme == "Obra vigente":
 else:
     inject_dark_theme_css()
 
+inject_app_shell_css()
+
 try:
     secrets = st.secrets
 except Exception:
@@ -1404,7 +1425,8 @@ with tab_summary:
                 styled_dataframe(compact_summary[visible_columns]),
                 use_container_width=True,
                 hide_index=True,
-                height=330,
+                height="auto",
+                row_height=35,
                 column_config={
                     "%": st.column_config.ProgressColumn(
                         "% con checada",

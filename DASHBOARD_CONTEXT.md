@@ -46,6 +46,7 @@ La aplicación se utiliza como corte de asistencia diaria, especialmente alreded
 14. En `v1.6.1`, Product UI claro usa iconos desplegables oscuros, menús claros, tablas de superficie cálida, gráfica clara y sombras cromáticas más visibles.
 15. Desde `v1.7.0`, el selector incluye `Studio táctil`, un tercer tema grafito inspirado en interfaces físicas con relieve, acentos azul eléctrico y dorado, bordes luminosos y sombras profundas.
 16. Desde `v1.8.0`, `Obra vigente` es el cuarto tema: una interfaz retro OS/terminal con retícula técnica, tipografía monoespaciada, blanco y negro, ámbar, bordes rígidos y sombras desplazadas.
+17. En `v1.8.1` se oculta la barra superior nativa de Streamlit y la tabla `Detalle del corte` ajusta su altura al contenido para evitar filas visuales vacías en todos los temas.
 
 ## 4. Catálogos
 
