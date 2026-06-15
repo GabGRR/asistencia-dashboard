@@ -854,7 +854,7 @@ def query_table(results: pd.DataFrame) -> pd.DataFrame:
 
 def style_query_rows(row: pd.Series) -> list[str]:
     state = str(row.get("Estado") or "")
-    if globals().get("visual_theme") == "Product UI claro":
+    if globals().get("visual_theme") == "Pintado claro":
         backgrounds = {
             "Con checada": "background-color: #edf8f3; color: #26332d",
             "Sin checada": "background-color: #fff3e5; color: #3b3025",
@@ -884,7 +884,7 @@ def style_query_rows(row: pd.Series) -> list[str]:
 
 def styled_dataframe(dataframe: pd.DataFrame, row_styler=None):
     styler = dataframe.style
-    if globals().get("visual_theme") == "Product UI claro":
+    if globals().get("visual_theme") == "Pintado claro":
         styler = styler.set_properties(
             **{
                 "background-color": "#fffefa",
@@ -933,13 +933,13 @@ with st.sidebar:
     st.markdown("### Apariencia")
     visual_theme = st.radio(
         "Tema visual",
-        ["Oscuro", "Product UI claro", "Studio táctil"],
+        ["Oscuro guinda", "Pintado Claro", "Studio táctil"],
         index=0,
         key="visual_theme",
     )
     st.caption(f"Dashboard de asistencia · v{APP_VERSION}")
 
-if visual_theme == "Product UI claro":
+if visual_theme == "Pintado claro":
     inject_product_ui_theme_css()
 elif visual_theme == "Studio táctil":
     inject_tactile_studio_theme_css()
@@ -1088,7 +1088,7 @@ with tab_summary:
                     + " · "
                     + chart_data["turno"].astype(str).str.title()
                 )
-                if visual_theme == "Product UI claro":
+                if visual_theme == "Pintado claro":
                     chart_long = chart_data.melt(
                         id_vars="grupo",
                         value_vars=["con_checada", "sin_checada"],
