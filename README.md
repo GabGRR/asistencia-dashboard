@@ -2,6 +2,12 @@
 
 Aplicación Streamlit independiente para contar qué personas tienen al menos una checada en una fecha seleccionada. No califica retardos, faltas, salidas ni justificaciones.
 
+## Icono de la aplicación
+
+El icono principal se encuentra en `assets/icon.png`. Streamlit lo usa como icono de la pestaña mediante `st.set_page_config`.
+
+Para que Chrome adopte el icono actualizado en un acceso directo instalado, conviene eliminar el acceso anterior, recargar la aplicación con `Ctrl+F5` y volver a crearlo activando **Abrir como ventana**.
+
 ## Ejecutar localmente
 
 ```powershell

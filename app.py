@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import html
+from pathlib import Path
 
 import altair as alt
 import pandas as pd
 import streamlit as st
+from PIL import Image
 
 from core.attendance import (
     STATUS_AMBIGUOUS,
@@ -27,9 +29,19 @@ from core.problem_reporting import build_problems_table
 from core.query import build_person_suggestions, filter_results
 
 
+APP_ROOT = Path(__file__).resolve().parent
+APP_ICON_PATH = APP_ROOT / "assets" / "icon.png"
+
+try:
+    with Image.open(APP_ICON_PATH) as icon_image:
+        APP_PAGE_ICON = icon_image.copy()
+except (FileNotFoundError, OSError):
+    APP_PAGE_ICON = "8️⃣"
+
+
 st.set_page_config(
-    page_title="Dashboard de asistencia diaria",
-    page_icon="✓",
+    page_title="Conteo de Asistencia",
+    page_icon=APP_PAGE_ICON,
     layout="wide",
     initial_sidebar_state="expanded",
 )
